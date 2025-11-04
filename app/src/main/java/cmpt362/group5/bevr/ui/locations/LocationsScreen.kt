@@ -6,12 +6,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
  * The screen that shows a map of all locations where the drinks were had.
  */
 @Composable
-fun LocationsScreen(modifier: Modifier = Modifier) {
+fun LocationsScreen(viewModel: LocationsViewModel = viewModel(factory = LocationsViewModel.Factory)) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
