@@ -12,6 +12,9 @@ import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
 import kotlinx.coroutines.launch
 
+/**
+ * Manages UI state for history screen
+ */
 class HistoryViewModel(private val drinkRecordsRepository: DrinkRecordRepository) : ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

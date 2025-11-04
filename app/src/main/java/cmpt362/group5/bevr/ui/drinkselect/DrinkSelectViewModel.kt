@@ -9,6 +9,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 
+/**
+ * Manages UI state for drink select dialog
+ */
 class DrinkSelectViewModel(private val userSettingsRepository: UserSettingsRepository) : ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
