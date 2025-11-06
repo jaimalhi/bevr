@@ -38,7 +38,7 @@ The app follows a **four-page structure**:
 ## Team
 
 - [Jai Malhi](https://github.com/jaimalhi)
-- Richard Gao
+- [Richard Gao](https://github.com/MrFlyingPizza)
 - David Mulej
 - Andrew La Grange
 - Noah Zakaib
