@@ -1,4 +1,4 @@
-package cmpt362.group5.bevr.ui.history
+package cmpt362.group5.bevr.ui.drinklog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,14 +13,14 @@ import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
 import kotlinx.coroutines.launch
 
 /**
- * Manages UI state for history screen
+ * Manages UI state for drink logs screen
  */
-class HistoryViewModel(private val drinkRecordsRepository: DrinkRecordRepository) : ViewModel() {
+class DrinkLogViewModel(private val drinkRecordsRepository: DrinkRecordRepository) : ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as BevrApplication)
-                HistoryViewModel(
+                DrinkLogViewModel(
                     drinkRecordsRepository = app.container.drinkRecordRepository,
                 )
             }

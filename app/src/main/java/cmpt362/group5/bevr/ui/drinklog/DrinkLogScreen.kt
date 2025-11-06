@@ -1,4 +1,4 @@
-package cmpt362.group5.bevr.ui.history
+package cmpt362.group5.bevr.ui.drinklog
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
 
 @Composable
-fun DrinkEntryListItem(record: DrinkRecord) {
+fun DrinkLogListItem(record: DrinkRecord) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -28,11 +28,11 @@ fun DrinkEntryListItem(record: DrinkRecord) {
 
 @Preview
 @Composable
-fun DrinkEntryList() {
+fun DrinkLogList() {
     val records = (1..20).map { i -> DrinkRecord(i) }
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(records) {
-            DrinkEntryListItem(it)
+            DrinkLogListItem(it)
         }
     }
 }
@@ -41,6 +41,6 @@ fun DrinkEntryList() {
  * The screen that display all of the drink records the the user entered.
  */
 @Composable
-fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory)) {
-    DrinkEntryList()
+fun DrinkLogScreen(drinkLogViewModel: DrinkLogViewModel = viewModel(factory = DrinkLogViewModel.Factory)) {
+    DrinkLogList()
 }

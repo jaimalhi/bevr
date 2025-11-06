@@ -31,7 +31,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import cmpt362.group5.bevr.ui.drinkentry.DrinkEntryScreen
 import cmpt362.group5.bevr.ui.drinkselect.DrinkSelectDialog
-import cmpt362.group5.bevr.ui.history.HistoryScreen
+import cmpt362.group5.bevr.ui.drinklog.DrinkLogScreen
 import cmpt362.group5.bevr.ui.locations.LocationsScreen
 import cmpt362.group5.bevr.ui.settings.SettingsScreen
 import cmpt362.group5.bevr.ui.theme.AppTheme
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
 
 interface Route {
     @Serializable
-    object History : Route
+    object DrinkLog : Route
 
     @Serializable
     object Locations : Route
@@ -68,7 +68,7 @@ interface Route {
 enum class NavItem(
     val route: Route, val label: String, val icon: ImageVector, val description: String
 ) {
-    HISTORY(Route.History, "History", Icons.Default.History, "Drink History"),
+    DRINK_LOG(Route.DrinkLog, "Drink Log", Icons.Default.History, "Drink Log"),
     LOCATIONS(Route.Locations, "Locations", Icons.Default.Map, "Locations"),
     DRINK_ENTRY(Route.DrinkEntry, "Add", Icons.Default.AddCircle, "Add New Drink Record"),
     DRINK_SELECT(Route.DrinkSelect, "Drinks", Icons.Default.Coffee, "Drinks Filter"),
@@ -79,7 +79,7 @@ enum class NavItem(
 @Composable
 fun Content() {
     val navController = rememberNavController()
-    val startNavItem = NavItem.HISTORY
+    val startNavItem = NavItem.DRINK_LOG
     var selectedNavItem by rememberSaveable { mutableIntStateOf(startNavItem.ordinal) }
     AppTheme {
         Scaffold(
@@ -103,7 +103,7 @@ fun Content() {
                 startDestination = Route.DrinkEntry,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                composable<Route.History> { HistoryScreen() }
+                composable<Route.DrinkLog> { DrinkLogScreen() }
                 composable<Route.Locations> { LocationsScreen() }
                 composable<Route.DrinkEntry> { DrinkEntryScreen() }
                 dialog<Route.DrinkSelect> { DrinkSelectDialog() }
