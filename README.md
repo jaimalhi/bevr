@@ -7,7 +7,7 @@
 ## Proposal & Demos
 
 - [Project Proposal](https://youtu.be/qjl6hmcpdQI)
-- Show & Tell 1 - *Coming soon*
+- [Show & Tell 1](https://youtu.be/C6ITJwtHAko)
 - Show & Tell 2 - *Coming soon*
 
 
