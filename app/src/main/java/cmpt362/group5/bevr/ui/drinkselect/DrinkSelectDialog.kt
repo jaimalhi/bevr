@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
- * The dialog that the user will use to select which drinks to primarily display in history and locations.
+ * The dialog that the user will use to select which drinks to primarily display in the drink log and locations.
  */
 @Composable
 fun DrinkSelectDialog(viewModel: DrinkSelectViewModel = viewModel(factory = DrinkSelectViewModel.Factory)) {
