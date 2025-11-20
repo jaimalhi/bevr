@@ -5,3 +5,9 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     id("com.google.devtools.ksp") version "2.2.21-2.0.4" apply false
 }
+
+buildscript {
+    dependencies {
+        classpath(libs.secrets.gradle.plugin)
+    }
+}
