@@ -61,4 +61,5 @@ class BevrApplication : Application() {
             .createFromAsset("bevr.db")
             .build()
     }
+
 }
