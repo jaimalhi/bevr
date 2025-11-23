@@ -1,6 +1,9 @@
 package cmpt362.group5.bevr.ui.settings
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -8,8 +11,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
-import cmpt362.group5.bevr.data.usersettings.DEFAULT_ACTIVE_BEVERAGES
 import cmpt362.group5.bevr.data.usersettings.DEFAULT_AVATAR_ID
+import cmpt362.group5.bevr.data.usersettings.DEFAULT_ACTIVE_BEVERAGES
 import cmpt362.group5.bevr.data.usersettings.UserSettings
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,8 +54,15 @@ class SettingsViewModel(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    // Snapshot of what is currently persisted in DataStore
+    // Snapshot of what is currently persisted in DataStore.
     private var initialSettings: UserSettings? = null
+
+    /**
+     * Flag used by the UI to know when a save has completed.
+     * SettingsScreen observes this and navigates back when it flips to true.
+     */
+    var saveCompleted by mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -63,7 +73,7 @@ class SettingsViewModel(
             _uiState.value = SettingsUiState(
                 displayName = settings.displayName,
                 avatarId = settings.avatarId,
-                activeBeverages = settings.activeBeverages.ifEmpty { DEFAULT_ACTIVE_BEVERAGES },
+                activeBeverages = settings.activeBeverages,
                 isDirty = false,
                 isLoading = false,
             )
@@ -115,12 +125,12 @@ class SettingsViewModel(
 
     /**
      * Persists current editable settings to the repository and resets dirty state.
-     * Caller (SettingsScreen) decides how/when to navigate away.
+     * The SettingsScreen listens to [saveCompleted] to navigate back when done.
      */
     fun onSave() {
         val current = _uiState.value
 
-        // Ensure we never save an empty set if the user somehow deselects all then hits save.
+        // This is the actual set that should ALWAYS be persisted
         val active = current.activeBeverages.ifEmpty { DEFAULT_ACTIVE_BEVERAGES }
 
         val newSettings = UserSettings(
@@ -129,12 +139,35 @@ class SettingsViewModel(
             activeBeverages = active,
         )
 
-        Log.d(LOG_TAG, "Saving settings: $newSettings")
+        saveCompleted = false
 
         viewModelScope.launch {
             userSettingsRepository.updateUserSettings(newSettings)
+
+            // 1. Sync initialSettings with real persisted value
             initialSettings = newSettings
-            _uiState.update { it.copy(isDirty = false) }
+
+            // 2. Sync UI state with real persisted value
+            _uiState.update {
+                it.copy(
+                    displayName = newSettings.displayName,
+                    avatarId = newSettings.avatarId,
+                    activeBeverages = newSettings.activeBeverages,
+                    isDirty = false
+                )
+            }
+
+            // 3. Notify the UI that we're done
+            saveCompleted = true
         }
+    }
+
+
+    /**
+     * Called by the UI once it has reacted to save completion (e.g. navigated back).
+     * This avoids stale true values if the ViewModel is reused.
+     */
+    fun clearSaveCompletedFlag() {
+        saveCompleted = false
     }
 }

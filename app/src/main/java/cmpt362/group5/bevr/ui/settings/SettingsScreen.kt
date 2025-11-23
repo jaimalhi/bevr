@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,17 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
+
+    // Observe the saveCompleted flag from the ViewModel.
+    val saveCompleted = settingsViewModel.saveCompleted
+
+    // When save completes, navigate back once and clear the flag.
+    LaunchedEffect(saveCompleted) {
+        if (saveCompleted) {
+            onNavigateBack()
+            settingsViewModel.clearSaveCompletedFlag()
+        }
+    }
 
     var showAvatarDialog by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
@@ -129,7 +141,10 @@ fun SettingsScreen(
                             Text(
                                 text = uiState.displayName.ifBlank { "Tap to set name" },
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.clickable { showNameDialog = true }
+                                modifier = Modifier
+                                    .clickable(
+                                        onClickLabel = "Edit name"
+                                    ) { showNameDialog = true }
                             )
                             IconButton(onClick = { showNameDialog = true }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit name")
@@ -212,7 +227,6 @@ fun SettingsScreen(
                 Button(
                     onClick = {
                         settingsViewModel.onSave()
-                        onNavigateBack()
                     },
                     enabled = uiState.isDirty,
                     modifier = Modifier

@@ -50,7 +50,7 @@ fun DrinkBreakdownChart(
             labels to values
         } else {
             val labels = BEVERAGE_DEFINITIONS.map { it.label }
-            val values = List(labels.size) { 1f } // skeleton bars
+            val values = List(labels.size) { 0f } // show empty chart
             labels to values
         }
     }
