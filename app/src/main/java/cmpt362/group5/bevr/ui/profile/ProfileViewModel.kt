@@ -13,6 +13,7 @@ import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordWithType
 import cmpt362.group5.bevr.data.usersettings.DEFAULT_AVATAR_ID
 import cmpt362.group5.bevr.data.usersettings.UserSettings
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
+import cmpt362.group5.bevr.data.usersettings.BEVERAGE_DEFINITIONS
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,10 +29,6 @@ data class ProfileUiState(
     val drinkTypeCounts: Map<String, Int> = emptyMap(),
 )
 
-/**
- * ViewModel for the Profile screen.
- * Combines user settings with drink record stats.
- */
 class ProfileViewModel(
     private val userSettingsRepository: UserSettingsRepository,
     private val drinkRecordRepository: DrinkRecordRepository,
@@ -71,33 +68,30 @@ class ProfileViewModel(
         settings: UserSettings,
         records: List<DrinkRecordWithType>
     ): ProfileUiState {
+
         val totalDrinks = records.size
 
-        // Favourite drink type, using display name from DrinkType.name
         val favouriteDrinkType = records
             .groupBy { it.drinkType.name }
             .maxByOrNull { (_, recs) -> recs.size }
             ?.key ?: "-"
 
-        // Build counts by "key" (coffee, tea, juice, liquor, boba)
         val countsByKey: Map<String, Int> = records
             .groupingBy { drinkTypeNameToKey(it.drinkType.name) }
             .eachCount()
 
-        // Filter by active beverages (if none selected, show all)
         val activeKeys = settings.activeBeverages
-        val filteredCounts: Map<String, Int> =
-            if (activeKeys.isEmpty()) {
-                countsByKey
-            } else {
-                countsByKey.filter { (key, _) -> key in activeKeys }
-            }
 
-        // Logging for debugging
+        val filteredCounts = if (activeKeys.isEmpty()) {
+            countsByKey
+        } else {
+            countsByKey.filter { (key, _) -> key in activeKeys }
+        }
+
         Log.d(
             LOG_TAG,
-            "Profile state build: total=$totalDrinks, favourite=$favouriteDrinkType, " +
-                    "activeKeys=$activeKeys, countsByKey=$countsByKey, filtered=$filteredCounts"
+            "Profile built -> total=$totalDrinks, fav=$favouriteDrinkType, " +
+                    "active=$activeKeys, rawCounts=$countsByKey, filtered=$filteredCounts"
         )
 
         return ProfileUiState(
@@ -111,16 +105,14 @@ class ProfileViewModel(
     }
 
     /**
-     * Normalize a DrinkType.name (e.g. "Coffee") into our settings key (e.g. "coffee").
-     * Adjust the mapping here if your DB names differ.
+     * Converts database drinkType.name -> settings key using BEVERAGE_DEFINITIONS.
+     * This guarantees one canonical mapping across the whole app.
      */
-    private fun drinkTypeNameToKey(name: String): String =
-        when (name.trim().lowercase()) {
-            "coffee" -> "coffee"
-            "tea" -> "tea"
-            "juice" -> "juice"
-            "boba", "bubble tea" -> "boba"
-            "liquor", "alcohol", "beer", "wine", "vodka" -> "liquor"
-            else -> name.trim().lowercase()
-        }
+    private fun drinkTypeNameToKey(name: String): String {
+        val normalized = name.trim().lowercase()
+
+        return BEVERAGE_DEFINITIONS
+            .firstOrNull { def -> def.dbNames.contains(normalized) }
+            ?.key ?: normalized
+    }
 }

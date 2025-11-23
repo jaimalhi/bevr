@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -34,16 +33,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cmpt362.group5.bevr.data.usersettings.BEVERAGE_DEFINITIONS
 import cmpt362.group5.bevr.ui.profile.AvatarCircle
 
 /**
@@ -151,14 +151,14 @@ fun SettingsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Desired Drink Types",
+                            text = "Active Drink Type",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(4.dp))
 
                         // "All" toggle
-                        val allSelected = SettingsViewModel.BEVERAGE_OPTIONS.all {
-                            it.key in uiState.activeBeverages
+                        val allSelected = BEVERAGE_DEFINITIONS.all { def ->
+                            def.key in uiState.activeBeverages
                         }
                         Row(
                             modifier = Modifier
@@ -181,24 +181,24 @@ fun SettingsScreen(
                         }
 
                         // Individual options
-                        SettingsViewModel.BEVERAGE_OPTIONS.forEach { option ->
-                            val checked = option.key in uiState.activeBeverages
+                        BEVERAGE_DEFINITIONS.forEach { def ->
+                            val checked = def.key in uiState.activeBeverages
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        settingsViewModel.onBeverageToggled(option.key)
+                                        settingsViewModel.onBeverageToggled(def.key)
                                     },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
                                     checked = checked,
                                     onCheckedChange = {
-                                        settingsViewModel.onBeverageToggled(option.key)
+                                        settingsViewModel.onBeverageToggled(def.key)
                                     }
                                 )
                                 Text(
-                                    text = option.label,
+                                    text = def.label,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
@@ -277,9 +277,8 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 0 = default, 1..n map to beverage options
-                    val avatarIds = listOf(0) +
-                            SettingsViewModel.BEVERAGE_OPTIONS.indices.map { it + 1 }
+                    // 0 = default, 1..n map to beverage definitions
+                    val avatarIds = listOf(0) + BEVERAGE_DEFINITIONS.indices.map { it + 1 }
                     val rows = avatarIds.chunked(3)
 
                     rows.forEach { row ->
