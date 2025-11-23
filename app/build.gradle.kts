@@ -20,7 +20,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -49,6 +48,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.compose)
     implementation(libs.compose.m3)
     ksp(libs.androidx.room.compiler)
@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.maps.compose.utils)
     implementation(libs.maps.compose.widgets)
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
 
     /**
      * Location dependencies
