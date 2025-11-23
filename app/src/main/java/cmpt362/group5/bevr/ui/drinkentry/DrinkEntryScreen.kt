@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -368,6 +369,12 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
                     drinkImageFile = drinkImageFile,
                     drinkRating = rating,
                 )
+                // Confirmation Toast
+                Toast.makeText(
+                    context,
+                    "Beverage Logged!",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         ) {
             Icon(Icons.Default.Add, "Add drink icon")
