@@ -24,5 +24,5 @@ class LocationsViewModel(private val drinkRecordsRepository: DrinkRecordReposito
         }
     }
 
-    val drinkRecords = drinkRecordsRepository.getDrinkRecords().asLiveData()
+    val drinkRecords = drinkRecordsRepository.getDrinkRecordsWithType().asLiveData()
 }

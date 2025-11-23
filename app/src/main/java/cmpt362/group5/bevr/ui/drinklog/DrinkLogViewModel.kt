@@ -27,7 +27,7 @@ class DrinkLogViewModel(private val drinkRecordsRepository: DrinkRecordRepositor
         }
     }
 
-    val drinkRecords = drinkRecordsRepository.getDrinkRecords().asLiveData()
+    val drinkRecords = drinkRecordsRepository.getDrinkRecordsWithType().asLiveData()
 
     fun deleteRecord(record: DrinkRecord) {
         viewModelScope.launch {
