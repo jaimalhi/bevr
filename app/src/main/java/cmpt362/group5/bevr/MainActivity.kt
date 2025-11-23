@@ -79,7 +79,7 @@ enum class NavItem(
 @Composable
 fun Content() {
     val navController = rememberNavController()
-    val startNavItem = NavItem.DRINK_LOG
+    val startNavItem = NavItem.DRINK_ENTRY
     var selectedNavItem by rememberSaveable { mutableIntStateOf(startNavItem.ordinal) }
     AppTheme {
         Scaffold(

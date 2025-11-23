@@ -9,22 +9,29 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
+import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepository
 import kotlinx.coroutines.launch
 
 /**
  * Manages UI state for drink entry screen
  */
-class DrinkEntryViewModel(private val drinkRecordsRepository: DrinkRecordRepository) : ViewModel() {
+class DrinkEntryViewModel(
+    private val drinkRecordsRepository: DrinkRecordRepository,
+    private val drinkTypeRepository: DrinkTypeRepository,
+) : ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as BevrApplication)
                 DrinkEntryViewModel(
                     drinkRecordsRepository = app.container.drinkRecordRepository,
+                    drinkTypeRepository = app.container.drinkTypeRepository,
                 )
             }
         }
     }
+
+    val drinkTypes = drinkTypeRepository.getDrinkTypes()
 
     fun addRecord(record: DrinkRecord) {
         viewModelScope.launch {
