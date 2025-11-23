@@ -8,6 +8,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.MarkerState
+import androidx.lifecycle.liveData
+import kotlinx.coroutines.flow.map
 
 /**
  * Manages UI state for location screen
@@ -23,6 +27,11 @@ class LocationsViewModel(private val drinkRecordsRepository: DrinkRecordReposito
             }
         }
     }
-
     val drinkRecords = drinkRecordsRepository.getDrinkRecordsWithType().asLiveData()
+    val locationFlow = drinkRecordsRepository.getDrinkRecordsWithType()
+        .map { list ->
+            list.map { record -> LatLng(record.drinkRecord.latitude,
+                record.drinkRecord.longitude) }
+        }
+        .asLiveData()
 }
