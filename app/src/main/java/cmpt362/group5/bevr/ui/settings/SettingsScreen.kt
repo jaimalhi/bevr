@@ -1,5 +1,6 @@
 package cmpt362.group5.bevr.ui.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -28,13 +31,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,15 +47,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cmpt362.group5.bevr.R
+import cmpt362.group5.bevr.ui.profile.AvatarCircle
 
 /**
  * The screen that allows the user to configure the application and personalize it.
  *
  * - Avatar + name header (both editable via dialogs)
- * - Checklist of drink types (active beverages)
+ * - Checklist of drink types (with "All" toggle)
  * - "Save changes" button that only enables when something has changed
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +79,7 @@ fun SettingsScreen(
                 title = { Text("Settings") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -87,11 +95,14 @@ fun SettingsScreen(
                 CircularProgressIndicator()
             }
         } else {
+            val minHeight = LocalWindowInfo.current.containerSize.height.dp * 0.8f
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp)
+                    .heightIn(min = minHeight)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -112,22 +123,12 @@ fun SettingsScreen(
                         Box(
                             contentAlignment = Alignment.BottomEnd
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                                    .clickable { showAvatarDialog = true },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                // Simple avatar: show first letter or generic
-                                val initial = uiState.displayName.firstOrNull()?.uppercase()
-                                    ?: "A"
-                                Text(
-                                    text = initial.toString(),
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                            }
+                            AvatarCircle(
+                                avatarId = uiState.avatarId,
+                                displayName = uiState.displayName,
+                                size = 80.dp
+                            )
+
                             IconButton(onClick = { showAvatarDialog = true }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit avatar")
                             }
@@ -167,6 +168,32 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(4.dp))
+
+                        // "All" toggle
+                        val allSelected = SettingsViewModel.BEVERAGE_OPTIONS.all {
+                            it.key in uiState.activeBeverages
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    settingsViewModel.setAllBeverages(!allSelected)
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = allSelected,
+                                onCheckedChange = {
+                                    settingsViewModel.setAllBeverages(it)
+                                }
+                            )
+                            Text(
+                                text = "All",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+
+                        // Individual options
                         SettingsViewModel.BEVERAGE_OPTIONS.forEach { option ->
                             val checked = option.key in uiState.activeBeverages
                             Row(
@@ -262,33 +289,39 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        (0 until SettingsViewModel.AVATAR_COUNT).forEach { index ->
-                            val isSelected = uiState.avatarId == index
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSelected)
-                                            MaterialTheme.colorScheme.primary
-                                        else
-                                            MaterialTheme.colorScheme.surfaceVariant
+
+                    val avatarIds = listOf(0, 1, 2, 3, 4, 5)
+                    val rows = avatarIds.chunked(3)
+
+                    rows.forEach { row ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            row.forEach { id ->
+                                val isSelected = uiState.avatarId == id
+                                Box(
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isSelected)
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                            else
+                                                MaterialTheme.colorScheme.surfaceVariant
+                                        )
+                                        .clickable {
+                                            settingsViewModel.onAvatarSelected(id)
+                                            showAvatarDialog = false
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    AvatarCircle(
+                                        avatarId = id,
+                                        displayName = uiState.displayName,
+                                        size = 40.dp
                                     )
-                                    .clickable {
-                                        settingsViewModel.onAvatarSelected(index)
-                                        showAvatarDialog = false
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = (index + 1).toString(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
+                                }
                             }
                         }
                     }

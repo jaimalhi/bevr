@@ -20,7 +20,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.Date
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -69,7 +68,7 @@ class DatabaseTest {
         val type = DrinkType(name = "Coffee", icon = DrinkTypeIcon.COFFEE)
         val id = drinkTypeDao.insert(type)
 
-        val expected = DrinkRecord(drinkTypeId = id, timestamp = Date())
+        val expected = DrinkRecord(drinkTypeId = id, name = "Coffee", longitude = 0.0, latitude = 0.0, rating = 1)
         drinkRecordDao.insertAll(expected)
 
         val first = drinkRecordDao.getAll().first().first()
@@ -80,7 +79,7 @@ class DatabaseTest {
     @Test(expected = SQLiteConstraintException::class)
     fun createDrinkRecordWithNonExistentType() = runBlocking {
         val nonExistingDrinkTypeId = 21L
-        val expected = DrinkRecord(drinkTypeId = nonExistingDrinkTypeId, timestamp = Date())
+        val expected = DrinkRecord(drinkTypeId = nonExistingDrinkTypeId,name = "Coffee", longitude = 0.0, latitude = 0.0, rating = 1)
         drinkRecordDao.insert(expected)
         Unit
     }

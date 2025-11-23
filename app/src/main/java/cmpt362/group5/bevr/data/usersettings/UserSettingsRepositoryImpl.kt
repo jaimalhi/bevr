@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import android.util.Log
 
 /**
  * This concrete implementation should only be constructed and referenced by [cmpt362.group5.bevr.BevrApplication].
@@ -15,6 +16,10 @@ import kotlinx.coroutines.flow.map
 class UserSettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>
 ) : UserSettingsRepository {
+
+    private companion object {
+        const val TAG = "UserSettingsRepo"
+    }
 
     /**
      * The keys that are used to get values from the preferences datastore
@@ -32,18 +37,28 @@ class UserSettingsRepositoryImpl(
     private val userSettings: Flow<UserSettings> = dataStore.data.map { preferences ->
         val displayName = preferences[Keys.DISPLAY_NAME] ?: "Guest"
         val avatarId = preferences[Keys.AVATAR_ID] ?: DEFAULT_AVATAR_ID
-        val activeBeverages = preferences[Keys.ACTIVE_BEVERAGES] ?: emptySet()
+        val storedSet = preferences[Keys.ACTIVE_BEVERAGES]
+        val activeBeverages = if (storedSet == null || storedSet.isEmpty()) {
+            DEFAULT_ACTIVE_BEVERAGES
+        } else {
+            storedSet
+        }
 
-        UserSettings(
+        val settings = UserSettings(
             displayName = displayName,
             avatarId = avatarId,
             activeBeverages = activeBeverages,
         )
+
+        Log.d(TAG, "Loaded settings from DataStore: $settings")
+
+        settings
     }
 
     override fun getUserSettings(): Flow<UserSettings> = userSettings
 
     override suspend fun updateUserSettings(settings: UserSettings) {
+        Log.d(TAG, "Persisting settings to DataStore: $settings")
         dataStore.edit { preferences ->
             preferences[Keys.DISPLAY_NAME] = settings.displayName
             preferences[Keys.AVATAR_ID] = settings.avatarId

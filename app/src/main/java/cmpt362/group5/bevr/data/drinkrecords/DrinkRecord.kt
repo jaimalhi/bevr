@@ -15,5 +15,9 @@ data class DrinkRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val drinkTypeId: Long,
-    val timestamp: Date,
+    val timestamp: Date = Date(),
+    val name: String,
+    val longitude: Double,
+    val latitude: Double,
+    val rating: Int
 )

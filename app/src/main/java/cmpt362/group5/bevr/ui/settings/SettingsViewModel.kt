@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
 import cmpt362.group5.bevr.data.usersettings.DEFAULT_AVATAR_ID
+import cmpt362.group5.bevr.data.usersettings.DEFAULT_ACTIVE_BEVERAGES
 import cmpt362.group5.bevr.data.usersettings.UserSettings
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import android.util.Log
 
 /**
  * Manages data and operations for the settings screen.
@@ -36,6 +38,8 @@ class SettingsViewModel(
     data class BeverageOption(val key: String, val label: String)
 
     companion object {
+        private const val TAG = "SettingsViewModel"
+
         // Beverage options used by the checklist in settings
         val BEVERAGE_OPTIONS = listOf(
             BeverageOption("coffee", "Coffee"),
@@ -45,7 +49,7 @@ class SettingsViewModel(
             BeverageOption("boba", "Boba / Bubble Tea"),
         )
 
-        // Number of avatar slots to choose from (0..AVATAR_COUNT-1)
+        // Number of avatar slots to choose from (0..5)
         const val AVATAR_COUNT: Int = 6
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -68,6 +72,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             // Take a single snapshot of current settings when the screen starts.
             val settings = userSettingsRepository.getUserSettings().first()
+            Log.d(TAG, "Initial settings loaded: $settings")
             initialSettings = settings
             _uiState.value = SettingsUiState(
                 displayName = settings.displayName,
@@ -110,6 +115,18 @@ class SettingsViewModel(
         }
     }
 
+    fun setAllBeverages(selected: Boolean) {
+        _uiState.update { current ->
+            val newSet = if (selected) {
+                DEFAULT_ACTIVE_BEVERAGES
+            } else {
+                emptySet()
+            }
+            val updated = current.copy(activeBeverages = newSet)
+            updated.copy(isDirty = computeIsDirty(updated))
+        }
+    }
+
     /**
      * Persists current editable settings to the repository and resets dirty state.
      * Caller (SettingsScreen) decides how/when to navigate away.
@@ -121,6 +138,8 @@ class SettingsViewModel(
             avatarId = current.avatarId,
             activeBeverages = current.activeBeverages,
         )
+
+        Log.d(TAG, "Saving settings: $newSettings")
 
         viewModelScope.launch {
             userSettingsRepository.updateUserSettings(newSettings)
