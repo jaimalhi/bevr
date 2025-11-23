@@ -33,6 +33,7 @@ import cmpt362.group5.bevr.ui.drinkentry.DrinkEntryScreen
 import cmpt362.group5.bevr.ui.drinkselect.DrinkSelectDialog
 import cmpt362.group5.bevr.ui.drinklog.DrinkLogScreen
 import cmpt362.group5.bevr.ui.locations.LocationsScreen
+import cmpt362.group5.bevr.ui.profile.ProfileScreen
 import cmpt362.group5.bevr.ui.settings.SettingsScreen
 import cmpt362.group5.bevr.ui.theme.AppTheme
 import kotlinx.serialization.Serializable
@@ -62,8 +63,10 @@ interface Route {
 
     @Serializable
     object Settings : Route
-}
 
+    @Serializable
+    object Profile : Route
+}
 
 enum class NavItem(
     val route: Route, val label: String, val icon: ImageVector, val description: String
@@ -72,7 +75,7 @@ enum class NavItem(
     LOCATIONS(Route.Locations, "Locations", Icons.Default.Map, "Locations"),
     DRINK_ENTRY(Route.DrinkEntry, "Add", Icons.Default.AddCircle, "Add New Drink Record"),
     DRINK_SELECT(Route.DrinkSelect, "Drinks", Icons.Default.Coffee, "Drinks Filter"),
-    SETTINGS(Route.Settings, "Settings", Icons.Default.AccountCircle, "Settings And Profile"),
+    PROFILE(Route.Profile, "Profile", Icons.Default.AccountCircle, "Profile"),
 }
 
 @Preview
@@ -83,7 +86,8 @@ fun Content() {
     var selectedNavItem by rememberSaveable { mutableIntStateOf(startNavItem.ordinal) }
     AppTheme {
         Scaffold(
-            modifier = Modifier.fillMaxSize(), bottomBar = {
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
                 NavigationBar {
                     NavItem.entries.forEachIndexed { index, item ->
                         NavigationBarItem(
@@ -97,7 +101,8 @@ fun Content() {
                         )
                     }
                 }
-            }) { innerPadding ->
+            }
+        ) { innerPadding ->
             NavHost(
                 navController,
                 startDestination = Route.DrinkEntry,
@@ -107,7 +112,21 @@ fun Content() {
                 composable<Route.Locations> { LocationsScreen() }
                 composable<Route.DrinkEntry> { DrinkEntryScreen() }
                 dialog<Route.DrinkSelect> { DrinkSelectDialog() }
-                composable<Route.Settings> { SettingsScreen() }
+
+                // Profile is the tab screen
+                composable<Route.Profile> {
+                    ProfileScreen(
+                        onOpenSettings = {
+                            navController.navigate(Route.Settings)
+                        }
+                    )
+                }
+                // Settings is only reachable from Profile, not in bottom nav
+                composable<Route.Settings> {
+                    SettingsScreen(
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -116,7 +135,8 @@ fun Content() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!", modifier = modifier
+        text = "Hello $name!",
+        modifier = modifier
     )
 }
 
