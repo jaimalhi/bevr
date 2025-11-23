@@ -4,37 +4,65 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import android.util.Log
 
 /**
  * This concrete implementation should only be constructed and referenced by [cmpt362.group5.bevr.BevrApplication].
  */
-class UserSettingsRepositoryImpl(private val dataStore: DataStore<Preferences>) :
-    UserSettingsRepository {
+class UserSettingsRepositoryImpl(
+    private val dataStore: DataStore<Preferences>
+) : UserSettingsRepository {
+
+    private companion object {
+        const val TAG = "UserSettingsRepo"
+    }
+
     /**
      * The keys that are used to get values from the preferences datastore
      */
     private object Keys {
-        /**
-         * Example only TODO: remove
-         */
-        val STUB_KEY = intPreferencesKey("stub")
+        val DISPLAY_NAME = stringPreferencesKey("display_name")
+        val AVATAR_ID = intPreferencesKey("avatar_id")
+        val ACTIVE_BEVERAGES = stringSetPreferencesKey("active_beverages")
     }
 
     /**
      * Initialize and keep a user settings flow.
      * Updates are emitted into this flow and collected by users of [UserSettingsRepository].
      */
-    private val userSettings = dataStore.data.map {
-        UserSettings(it[Keys.STUB_KEY] ?: 0) // TODO: Example data access only. Remove.
+    private val userSettings: Flow<UserSettings> = dataStore.data.map { preferences ->
+        val displayName = preferences[Keys.DISPLAY_NAME] ?: "Guest"
+        val avatarId = preferences[Keys.AVATAR_ID] ?: DEFAULT_AVATAR_ID
+        val storedSet = preferences[Keys.ACTIVE_BEVERAGES]
+        val activeBeverages = if (storedSet == null || storedSet.isEmpty()) {
+            DEFAULT_ACTIVE_BEVERAGES
+        } else {
+            storedSet
+        }
+
+        val settings = UserSettings(
+            displayName = displayName,
+            avatarId = avatarId,
+            activeBeverages = activeBeverages,
+        )
+
+        Log.d(TAG, "Loaded settings from DataStore: $settings")
+
+        settings
     }
 
     override fun getUserSettings(): Flow<UserSettings> = userSettings
 
     override suspend fun updateUserSettings(settings: UserSettings) {
+        Log.d(TAG, "Persisting settings to DataStore: $settings")
         dataStore.edit { preferences ->
-            preferences[Keys.STUB_KEY] = settings.stub // TODO: Example data update only. Remove.
+            preferences[Keys.DISPLAY_NAME] = settings.displayName
+            preferences[Keys.AVATAR_ID] = settings.avatarId
+            preferences[Keys.ACTIVE_BEVERAGES] = settings.activeBeverages
         }
     }
 }
