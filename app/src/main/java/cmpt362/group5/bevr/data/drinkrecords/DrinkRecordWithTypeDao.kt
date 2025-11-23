@@ -8,4 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface DrinkRecordWithTypeDao {
     @Query("SELECT * FROM DrinkRecord")
     fun getAll(): Flow<List<DrinkRecordWithType>>
+
+    @Query("SELECT * FROM DrinkRecord WHERE id = :id")
+    fun get(id: Long): Flow<DrinkRecordWithType>
 }

@@ -25,10 +25,14 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +74,10 @@ private const val DRINK_IMAGE_PATH = "images/new_drink.bmp"
 
 private val locationPermissions =
     arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+
+private const val DEFAULT_RATING = 3
+
+private lateinit var drinkImageFile: File
 
 /**
  * The screen that allows the user to enter details about the drink they just had.
@@ -117,6 +125,9 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         }
     }
 
+    /**
+     * Get location permission and current location
+     */
     LaunchedEffect(Unit) {
         when {
             locationPermissions.all {
@@ -138,10 +149,10 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
     var shouldShowCameraPermissionRationale by remember { mutableStateOf(false) }
 
     val imageUri by rememberSaveable {
-        val file = File(context.cacheDir, DRINK_IMAGE_PATH)
-        file.parentFile?.mkdirs()
-        file.createNewFile()
-        val uri = getUriForFile(context, BevrFileProvider.AUTHORITY, file)
+        drinkImageFile = File(context.cacheDir, DRINK_IMAGE_PATH)
+        drinkImageFile.parentFile?.mkdirs()
+        drinkImageFile.createNewFile()
+        val uri = getUriForFile(context, BevrFileProvider.AUTHORITY, drinkImageFile)
         mutableStateOf(uri)
     }
 
@@ -222,6 +233,8 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         )
     }
 
+    var rating by rememberSaveable { mutableStateOf(DEFAULT_RATING) }
+
     Column(
         modifier = Modifier.padding(Spacing.Medium),
         verticalArrangement = Arrangement.spacedBy(Spacing.Medium),
@@ -233,47 +246,65 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
             color = MaterialTheme.colorScheme.primary
         )
 
-        LazyVerticalGrid(
-            modifier = Modifier.wrapContentHeight(),
-            columns = GridCells.Fixed(4)
-        ) {
-            items(drinkTypes) { drinkType ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable(onClick = { selectedDrinkTypeId = drinkType.id })
-                        .padding(Spacing.Small)
-                        .clip(MaterialTheme.shapes.medium),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Icon(
-                        painter = painterResource(drinkType.icon.resId),
-                        contentDescription = drinkType.name,
-                        modifier = Modifier.size(IconSize.Large),
-                        tint = if (drinkType.id == selectedDrinkTypeId) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        }
-                    )
-                    Text(
-                        text = drinkType.name,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            label = { Text("Name of the drink") },
+            label = { Text("What is it called?") },
             value = drinkName,
             placeholder = { Text("Coffee") },
             onValueChange = { drinkName = it },
             shape = MaterialTheme.shapes.medium
         )
+
+        Text(
+            text = "What type is it?",
+            style = MaterialTheme.typography.labelLarge
+        )
+        LazyVerticalGrid(
+            modifier = Modifier.wrapContentHeight(),
+            columns = GridCells.Fixed(6)
+        ) {
+            items(drinkTypes) { drinkType ->
+                Column(
+                    modifier = Modifier
+                        .padding(Spacing.Small)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    FilledIconToggleButton(drinkType.id == selectedDrinkTypeId, { selectedDrinkTypeId = drinkType.id }) {
+                        Icon(
+                            painter = painterResource(drinkType.icon.resId),
+                            contentDescription = drinkType.name,
+                            modifier = Modifier.size(IconSize.Standard),
+                        )
+                    }
+                    Text(
+                        text = drinkType.name,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = "Give it a rating",
+            style = MaterialTheme.typography.labelLarge
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            (1..5).forEach {
+                OutlinedIconButton({ rating = if (it == rating) 0 else it }) {
+                    Icon(
+                        imageVector = if (it <= rating) Icons.Default.Star else Icons.Default.StarBorder,
+                        contentDescription = "Rating star",
+                    )
+                }
+            }
+        }
 
         Row(
             modifier = Modifier.weight(1f),
@@ -328,8 +359,16 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         }
 
         Button(
-            enabled = selectedDrinkTypeId != null,
-            onClick = { Log.i(TAG, "Add drink button clicked") }
+            enabled = selectedDrinkTypeId != null && drinkName.isNotBlank() && imageSaved && drinkLocation != null,
+            onClick = {
+                viewModel.addRecord(
+                    drinkTypeId = selectedDrinkTypeId!!,
+                    drinkName = drinkName,
+                    location = drinkLocation!!,
+                    drinkImageFile = drinkImageFile,
+                    drinkRating = rating,
+                )
+            }
         ) {
             Icon(Icons.Default.Add, "Add drink icon")
             Text("Log this drink")

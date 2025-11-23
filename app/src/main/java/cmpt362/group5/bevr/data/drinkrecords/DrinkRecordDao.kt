@@ -11,6 +11,9 @@ interface DrinkRecordDao {
     @Query("SELECT * FROM DrinkRecord")
     fun getAll(): Flow<List<DrinkRecord>>
 
+    @Query("SELECT * FROM DrinkRecord WHERE id = :id")
+    fun get(id: Long): Flow<DrinkRecord>
+
     @Insert
     suspend fun insertAll(vararg drinkRecords: DrinkRecord)
 
