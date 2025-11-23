@@ -10,7 +10,11 @@ import cmpt362.group5.bevr.BevrApplication
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
 import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepository
+import cmpt362.group5.bevr.data.images.DrinkRecordImageRepository
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Manages UI state for drink entry screen
@@ -18,6 +22,7 @@ import kotlinx.coroutines.launch
 class DrinkEntryViewModel(
     private val drinkRecordsRepository: DrinkRecordRepository,
     private val drinkTypeRepository: DrinkTypeRepository,
+    private val drinkRecordImageRepository: DrinkRecordImageRepository,
 ) : ViewModel() {
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -26,6 +31,7 @@ class DrinkEntryViewModel(
                 DrinkEntryViewModel(
                     drinkRecordsRepository = app.container.drinkRecordRepository,
                     drinkTypeRepository = app.container.drinkTypeRepository,
+                    drinkRecordImageRepository = app.container.drinkRecordImageRepository,
                 )
             }
         }
@@ -33,9 +39,25 @@ class DrinkEntryViewModel(
 
     val drinkTypes = drinkTypeRepository.getDrinkTypes()
 
-    fun addRecord(record: DrinkRecord) {
+    fun addRecord(
+        drinkTypeId: Long,
+        drinkName: String,
+        drinkRating: Int,
+        location: LatLng,
+        drinkImageFile: File
+    ) {
         viewModelScope.launch {
-            drinkRecordsRepository.createDrinkRecord(record)
+            val id = drinkRecordsRepository.createDrinkRecord(
+                DrinkRecord(
+                    name = drinkName,
+                    latitude = location.latitude,
+                    longitude = location.longitude,
+                    drinkTypeId = drinkTypeId,
+                    rating = drinkRating,
+                )
+            )
+            val newDrinkRecord = drinkRecordsRepository.getDrinkRecord(id).first()
+            drinkRecordImageRepository.saveImageForDrinkRecord(newDrinkRecord, drinkImageFile)
         }
     }
 }

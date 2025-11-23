@@ -8,6 +8,7 @@ import androidx.room.Room
 import cmpt362.group5.bevr.data.BevrDatabase
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepositoryImpl
 import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepositoryImpl
+import cmpt362.group5.bevr.data.images.DrinkRecordImageRepositoryImpl
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepositoryImpl
 
@@ -41,6 +42,11 @@ class BevrApplication : Application() {
             )
         }
         override val drinkTypeRepository by lazy { DrinkTypeRepositoryImpl(database.drinkTypeDao()) }
+        override val drinkRecordImageRepository by lazy {
+            DrinkRecordImageRepositoryImpl(
+                applicationContext
+            )
+        }
     }
 
 

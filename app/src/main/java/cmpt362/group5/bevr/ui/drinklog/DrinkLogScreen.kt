@@ -13,7 +13,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
-import java.util.Date
 
 @Composable
 fun DrinkLogListItem(record: DrinkRecord) {
@@ -30,15 +29,13 @@ fun DrinkLogListItem(record: DrinkRecord) {
 @Preview
 @Composable
 fun DrinkLogList() {
-    // Set defaults for building purposes
     val records = (1..20L).map { i -> DrinkRecord(
         i,
         drinkTypeId = 0,
-        timestamp = Date(),
-        name = "",
+        name = "Test $i",
         longitude = 0.0,
         latitude = 0.0,
-        rating = 0
+        rating = 1,
     ) }
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(records) {

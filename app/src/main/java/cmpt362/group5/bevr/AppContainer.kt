@@ -2,6 +2,7 @@ package cmpt362.group5.bevr
 
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
 import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepository
+import cmpt362.group5.bevr.data.images.DrinkRecordImageRepository
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 
 /**
@@ -13,4 +14,5 @@ interface AppContainer {
     val userSettingsRepository: UserSettingsRepository
     val drinkRecordRepository: DrinkRecordRepository
     val drinkTypeRepository: DrinkTypeRepository
+    val drinkRecordImageRepository: DrinkRecordImageRepository
 }
