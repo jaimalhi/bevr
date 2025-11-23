@@ -1,6 +1,5 @@
 package cmpt362.group5.bevr.ui.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,13 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
@@ -38,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,18 +42,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cmpt362.group5.bevr.R
 import cmpt362.group5.bevr.ui.profile.AvatarCircle
 
 /**
  * The screen that allows the user to configure the application and personalize it.
  *
- * - Avatar + name header (both editable via dialogs)
+ * - Avatar + name header (avatar left, name right, edit icons beside)
  * - Checklist of drink types (with "All" toggle)
  * - "Save changes" button that only enables when something has changed
  */
@@ -95,49 +86,45 @@ fun SettingsScreen(
                 CircularProgressIndicator()
             }
         } else {
-            val minHeight = LocalWindowInfo.current.containerSize.height.dp * 0.8f
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp)
-                    .heightIn(min = minHeight)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header: Avatar + Name
+                // Header: Avatar + Name in a row
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Avatar with edit icon
-                        Box(
-                            contentAlignment = Alignment.BottomEnd
+                        // Avatar + edit icon
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             AvatarCircle(
                                 avatarId = uiState.avatarId,
                                 displayName = uiState.displayName,
-                                size = 80.dp
+                                size = 56.dp
                             )
-
                             IconButton(onClick = { showAvatarDialog = true }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit avatar")
                             }
                         }
 
-                        // Name with edit icon
+                        // Name + edit icon
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 text = uiState.displayName.ifBlank { "Tap to set name" },
@@ -164,7 +151,7 @@ fun SettingsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Drink types to show",
+                            text = "Desired Drink Types",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -274,7 +261,7 @@ fun SettingsScreen(
         )
     }
 
-    // Avatar selection dialog
+    // Avatar selection dialog (2 rows × 3 items)
     if (showAvatarDialog) {
         AlertDialog(
             onDismissRequest = { showAvatarDialog = false },
@@ -290,7 +277,9 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    val avatarIds = listOf(0, 1, 2, 3, 4, 5)
+                    // 0 = default, 1..n map to beverage options
+                    val avatarIds = listOf(0) +
+                            SettingsViewModel.BEVERAGE_OPTIONS.indices.map { it + 1 }
                     val rows = avatarIds.chunked(3)
 
                     rows.forEach { row ->

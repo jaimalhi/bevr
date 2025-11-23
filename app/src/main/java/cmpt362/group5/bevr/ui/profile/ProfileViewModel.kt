@@ -1,5 +1,6 @@
 package cmpt362.group5.bevr.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -37,6 +38,8 @@ class ProfileViewModel(
 ) : ViewModel() {
 
     companion object {
+        const val LOG_TAG = "ProfileViewModel"
+
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as BevrApplication)
@@ -70,13 +73,32 @@ class ProfileViewModel(
     ): ProfileUiState {
         val totalDrinks = records.size
 
-        val countsByType: Map<String, Int> = records
-            .groupingBy { it.drinkType.name }
+        // Favourite drink type, using display name from DrinkType.name
+        val favouriteDrinkType = records
+            .groupBy { it.drinkType.name }
+            .maxByOrNull { (_, recs) -> recs.size }
+            ?.key ?: "-"
+
+        // Build counts by "key" (coffee, tea, juice, liquor, boba)
+        val countsByKey: Map<String, Int> = records
+            .groupingBy { drinkTypeNameToKey(it.drinkType.name) }
             .eachCount()
 
-        val favouriteDrinkType = countsByType
-            .maxByOrNull { it.value }
-            ?.key ?: "-"
+        // Filter by active beverages (if none selected, show all)
+        val activeKeys = settings.activeBeverages
+        val filteredCounts: Map<String, Int> =
+            if (activeKeys.isEmpty()) {
+                countsByKey
+            } else {
+                countsByKey.filter { (key, _) -> key in activeKeys }
+            }
+
+        // Logging for debugging
+        Log.d(
+            LOG_TAG,
+            "Profile state build: total=$totalDrinks, favourite=$favouriteDrinkType, " +
+                    "activeKeys=$activeKeys, countsByKey=$countsByKey, filtered=$filteredCounts"
+        )
 
         return ProfileUiState(
             isLoading = false,
@@ -84,7 +106,21 @@ class ProfileViewModel(
             avatarId = settings.avatarId,
             totalDrinks = totalDrinks,
             favouriteDrinkType = favouriteDrinkType,
-            drinkTypeCounts = countsByType,
+            drinkTypeCounts = filteredCounts,
         )
     }
+
+    /**
+     * Normalize a DrinkType.name (e.g. "Coffee") into our settings key (e.g. "coffee").
+     * Adjust the mapping here if your DB names differ.
+     */
+    private fun drinkTypeNameToKey(name: String): String =
+        when (name.trim().lowercase()) {
+            "coffee" -> "coffee"
+            "tea" -> "tea"
+            "juice" -> "juice"
+            "boba", "bubble tea" -> "boba"
+            "liquor", "alcohol", "beer", "wine", "vodka" -> "liquor"
+            else -> name.trim().lowercase()
+        }
 }
