@@ -1,52 +1,27 @@
 package cmpt362.group5.bevr.ui.profile
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.R
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
 
 /**
  * Profile screen shown from the bottom navigation bar.
- *
- * - Header with avatar + name (avatar left, name right)
- * - Stats row: total drinks, favourite drink type
- * - Bar graph of drink type counts (always visible, filtered by active beverages)
- * - Button to open Settings page
  */
 @Composable
 fun ProfileScreen(
@@ -73,11 +48,11 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header: avatar on the left, name on the right
+            // Header: avatar left, name right
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -99,7 +74,7 @@ fun ProfileScreen(
                 }
             }
 
-            // Stats row: total drinks + favourite drink type
+            // Stats: total drinks + favourite type
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -116,11 +91,11 @@ fun ProfileScreen(
                 )
             }
 
-            // Bar chart of drink types — always visible
+            // Drink breakdown
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(2.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -133,24 +108,24 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
 
-                    BarChart(drinkTypeCounts = uiState.drinkTypeCounts)
+                    // Normalized chart input (sorted by BEVERAGE_DEFINITIONS)
+                    DrinkBreakdownChart(
+                        drinkTypeCounts = uiState.drinkTypeCounts
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // Open settings button
+            // Open settings
             Button(
                 onClick = onOpenSettings,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings"
-                )
-                Spacer(modifier = Modifier.size(8.dp))
+                Icon(Icons.Default.Settings, contentDescription = "Settings")
+                Spacer(Modifier.size(8.dp))
                 Text("Open Settings")
             }
         }
@@ -166,7 +141,7 @@ private fun StatCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -188,28 +163,14 @@ private fun StatCard(
     }
 }
 
-@Composable
-private fun BarChart(drinkTypeCounts: Map<String, Int>) {
-    DrinkBreakdownChart(drinkTypeCounts = drinkTypeCounts)
-
-}
-
 /**
- * Shared avatar rendering used by both Profile and Settings.
- *
- * avatarId:
- * 0 = default (first letter)
- * 1 = coffee icon
- * 2 = tea icon
- * 3 = juice icon
- * 4 = liquor icon
- * 5 = boba icon
+ * Shared avatar rendering used by both Profile & Settings
  */
 @Composable
 fun AvatarCircle(
     avatarId: Int,
     displayName: String,
-    size: androidx.compose.ui.unit.Dp,
+    size: Dp,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -221,27 +182,27 @@ fun AvatarCircle(
     ) {
         when (avatarId) {
             1 -> Image(
-                painter = painterResource(R.drawable.coffee_bean_filled_roast_brew_svgrepo_com),
+                painterResource(R.drawable.coffee_bean_filled_roast_brew_svgrepo_com),
                 contentDescription = "Coffee avatar",
                 modifier = Modifier.size(size * 0.6f)
             )
             2 -> Image(
-                painter = painterResource(R.drawable.tea_leaf_svgrepo_com),
+                painterResource(R.drawable.tea_leaf_svgrepo_com),
                 contentDescription = "Tea avatar",
                 modifier = Modifier.size(size * 0.6f)
             )
             3 -> Image(
-                painter = painterResource(R.drawable.orange_svgrepo_com),
+                painterResource(R.drawable.orange_svgrepo_com),
                 contentDescription = "Juice avatar",
                 modifier = Modifier.size(size * 0.6f)
             )
             4 -> Image(
-                painter = painterResource(R.drawable.cocktail_svgrepo_com),
+                painterResource(R.drawable.cocktail_svgrepo_com),
                 contentDescription = "Liquor avatar",
                 modifier = Modifier.size(size * 0.6f)
             )
             5 -> Image(
-                painter = painterResource(R.drawable.bubble_tea_icon),
+                painterResource(R.drawable.bubble_tea_icon),
                 contentDescription = "Boba avatar",
                 modifier = Modifier.size(size * 0.6f)
             )

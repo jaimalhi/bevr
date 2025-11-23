@@ -1,13 +1,15 @@
 package cmpt362.group5.bevr.ui.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
-import cmpt362.group5.bevr.data.usersettings.DEFAULT_AVATAR_ID
 import cmpt362.group5.bevr.data.usersettings.DEFAULT_ACTIVE_BEVERAGES
+import cmpt362.group5.bevr.data.usersettings.DEFAULT_AVATAR_ID
 import cmpt362.group5.bevr.data.usersettings.UserSettings
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,9 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import android.util.Log
 
 /**
  * Manages data and operations for the settings screen.
@@ -35,19 +35,8 @@ class SettingsViewModel(
         val isLoading: Boolean = true,
     )
 
-    data class BeverageOption(val key: String, val label: String)
-
     companion object {
         private const val LOG_TAG = "SettingsViewModel"
-
-        // Beverage options used by the checklist in settings
-        val BEVERAGE_OPTIONS = listOf(
-            BeverageOption("coffee", "Coffee"),
-            BeverageOption("tea", "Tea"),
-            BeverageOption("juice", "Juice"),
-            BeverageOption("liquor", "Liquor"),
-            BeverageOption("boba", "Boba / Bubble Tea"),
-        )
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -62,7 +51,7 @@ class SettingsViewModel(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    // Snapshot of what is currently persisted in DataStore.
+    // Snapshot of what is currently persisted in DataStore
     private var initialSettings: UserSettings? = null
 
     init {
@@ -74,7 +63,7 @@ class SettingsViewModel(
             _uiState.value = SettingsUiState(
                 displayName = settings.displayName,
                 avatarId = settings.avatarId,
-                activeBeverages = settings.activeBeverages,
+                activeBeverages = settings.activeBeverages.ifEmpty { DEFAULT_ACTIVE_BEVERAGES },
                 isDirty = false,
                 isLoading = false,
             )
@@ -130,10 +119,14 @@ class SettingsViewModel(
      */
     fun onSave() {
         val current = _uiState.value
+
+        // Ensure we never save an empty set if the user somehow deselects all then hits save.
+        val active = current.activeBeverages.ifEmpty { DEFAULT_ACTIVE_BEVERAGES }
+
         val newSettings = UserSettings(
             displayName = current.displayName,
             avatarId = current.avatarId,
-            activeBeverages = current.activeBeverages,
+            activeBeverages = active,
         )
 
         Log.d(LOG_TAG, "Saving settings: $newSettings")
