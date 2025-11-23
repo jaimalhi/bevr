@@ -26,6 +26,8 @@ datastoreCore = "1.2.0"
 datastorePreferencesCore = "1.2.0"
 lifecycleLivedataKtx = "2.10.0"
 runtimeLivedata = "1.9.5"
+compose = "2.3.6"
+composeM3 = "2.3.6"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -61,6 +63,8 @@ maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets"
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "compose" }
+compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "composeM3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
