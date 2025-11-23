@@ -39,14 +39,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.R
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
-import cmpt362.group5.bevr.ui.settings.SettingsViewModel
 
 /**
  * Profile screen shown from the bottom navigation bar.
  *
- * - Header with avatar + name
+ * - Header with avatar + name (avatar left, name right)
  * - Stats row: total drinks, favourite drink type
- * - Bar graph of drink type counts (always visible, with skeleton when empty)
+ * - Bar graph of drink type counts (always visible, filtered by active beverages)
  * - Button to open Settings page
  */
 @Composable
@@ -64,8 +63,7 @@ fun ProfileScreen(
             CircularProgressIndicator()
         }
     } else {
-        val configuration = LocalConfiguration.current
-        val minHeight = configuration.screenHeightDp.dp * 0.8f
+        val minHeight = (LocalConfiguration.current.screenHeightDp * 0.8f).dp
 
         Column(
             modifier = Modifier
@@ -75,23 +73,23 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
+            // Header: avatar on the left, name on the right
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     AvatarCircle(
                         avatarId = uiState.avatarId,
                         displayName = uiState.displayName,
-                        size = 80.dp
+                        size = 72.dp
                     )
 
                     Text(
@@ -195,20 +193,24 @@ private fun BarChart(
     drinkTypeCounts: Map<String, Int>,
     maxBarHeight: Int = 120
 ) {
-    val entries = if (drinkTypeCounts.isNotEmpty()) {
-        drinkTypeCounts.entries.sortedByDescending { it.value }
-    } else {
-        // Skeleton entries when there is no data
-        listOf(
-            "Coffee" to 1,
-            "Tea" to 1,
-            "Juice" to 1,
-            "Liquor" to 1,
-            "Boba" to 1,
-        )
-    }
+    // Always normalize to List<Pair<String, Int>>
+    val entries: List<Pair<String, Int>> =
+        if (drinkTypeCounts.isNotEmpty()) {
+            drinkTypeCounts
+                .map { (key, value) -> key to value }
+                .sortedByDescending { it.second }
+        } else {
+            // Skeleton entries when there is no data
+            listOf(
+                "Coffee" to 1,
+                "Tea" to 1,
+                "Juice" to 1,
+                "Liquor" to 1,
+                "Boba" to 1,
+            )
+        }
 
-    val maxCount = entries.maxOfOrNull { it.second } ?: 1
+    val maxCount = entries.maxOf { it.second }.coerceAtLeast(1)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -230,7 +232,7 @@ private fun BarChart(
             verticalAlignment = Alignment.Bottom
         ) {
             entries.forEach { (label, count) ->
-                val heightFactor = count.toFloat() / maxCount
+                val heightFactor = count.toFloat() / maxCount.toFloat()
                 val barHeightDp = (maxBarHeight * heightFactor).dp
 
                 Column(
@@ -310,7 +312,7 @@ fun AvatarCircle(
             else -> {
                 val initial = displayName.firstOrNull()?.uppercase() ?: "A"
                 Text(
-                    text = initial.toString(),
+                    text = initial,
                     style = MaterialTheme.typography.headlineMedium
                 )
             }

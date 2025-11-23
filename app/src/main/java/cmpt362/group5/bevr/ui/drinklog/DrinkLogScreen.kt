@@ -30,10 +30,15 @@ fun DrinkLogListItem(record: DrinkRecord) {
 @Preview
 @Composable
 fun DrinkLogList() {
+    // Set defaults for building purposes
     val records = (1..20L).map { i -> DrinkRecord(
         i,
         drinkTypeId = 0,
-        timestamp = Date()
+        timestamp = Date(),
+        name = "",
+        longitude = 0.0,
+        latitude = 0.0,
+        rating = 0
     ) }
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(records) {

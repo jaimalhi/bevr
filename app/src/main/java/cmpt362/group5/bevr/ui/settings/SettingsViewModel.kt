@@ -38,7 +38,7 @@ class SettingsViewModel(
     data class BeverageOption(val key: String, val label: String)
 
     companion object {
-        private const val TAG = "SettingsViewModel"
+        private const val LOG_TAG = "SettingsViewModel"
 
         // Beverage options used by the checklist in settings
         val BEVERAGE_OPTIONS = listOf(
@@ -48,9 +48,6 @@ class SettingsViewModel(
             BeverageOption("liquor", "Liquor"),
             BeverageOption("boba", "Boba / Bubble Tea"),
         )
-
-        // Number of avatar slots to choose from (0..5)
-        const val AVATAR_COUNT: Int = 6
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -72,7 +69,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             // Take a single snapshot of current settings when the screen starts.
             val settings = userSettingsRepository.getUserSettings().first()
-            Log.d(TAG, "Initial settings loaded: $settings")
+            Log.d(LOG_TAG, "Initial settings loaded: $settings")
             initialSettings = settings
             _uiState.value = SettingsUiState(
                 displayName = settings.displayName,
@@ -139,7 +136,7 @@ class SettingsViewModel(
             activeBeverages = current.activeBeverages,
         )
 
-        Log.d(TAG, "Saving settings: $newSettings")
+        Log.d(LOG_TAG, "Saving settings: $newSettings")
 
         viewModelScope.launch {
             userSettingsRepository.updateUserSettings(newSettings)
