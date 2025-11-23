@@ -189,73 +189,9 @@ private fun StatCard(
 }
 
 @Composable
-private fun BarChart(
-    drinkTypeCounts: Map<String, Int>,
-    maxBarHeight: Int = 120
-) {
-    // Always normalize to List<Pair<String, Int>>
-    val entries: List<Pair<String, Int>> =
-        if (drinkTypeCounts.isNotEmpty()) {
-            drinkTypeCounts
-                .map { (key, value) -> key to value }
-                .sortedByDescending { it.second }
-        } else {
-            // Skeleton entries when there is no data
-            listOf(
-                "Coffee" to 1,
-                "Tea" to 1,
-                "Juice" to 1,
-                "Liquor" to 1,
-                "Boba" to 1,
-            )
-        }
+private fun BarChart(drinkTypeCounts: Map<String, Int>) {
+    DrinkBreakdownChart(drinkTypeCounts = drinkTypeCounts)
 
-    val maxCount = entries.maxOf { it.second }.coerceAtLeast(1)
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        if (drinkTypeCounts.isEmpty()) {
-            Text(
-                text = "No drinks logged yet. Add some to see your breakdown!",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            entries.forEach { (label, count) ->
-                val heightFactor = count.toFloat() / maxCount.toFloat()
-                val barHeightDp = (maxBarHeight * heightFactor).dp
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(24.dp)
-                            .height(barHeightDp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    }
 }
 
 /**
