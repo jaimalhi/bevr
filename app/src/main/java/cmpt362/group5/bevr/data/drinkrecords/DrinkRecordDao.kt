@@ -8,11 +8,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DrinkRecordDao {
-    @Query("SELECT * FROM drink_record")
+    @Query("SELECT * FROM DrinkRecord")
     fun getAll(): Flow<List<DrinkRecord>>
 
     @Insert
     suspend fun insertAll(vararg drinkRecords: DrinkRecord)
+
+    @Insert
+    suspend fun insert(drinkRecord: DrinkRecord): Long
 
     @Delete
     suspend fun delete(drinkRecord: DrinkRecord)

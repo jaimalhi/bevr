@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import cmpt362.group5.bevr.data.BevrDatabase
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepositoryImpl
+import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepositoryImpl
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepositoryImpl
 
@@ -28,8 +29,18 @@ class BevrApplication : Application() {
      * A container that holds data access objects and can be accessed from anywhere in the application.
      */
     val container: AppContainer = object : AppContainer {
-        override val userSettingsRepository by lazy { UserSettingsRepositoryImpl(userSettingsDataStore) }
-        override val drinkRecordRepository by lazy { DrinkRecordRepositoryImpl(database.drinkRecordDao()) }
+        override val userSettingsRepository by lazy {
+            UserSettingsRepositoryImpl(
+                userSettingsDataStore
+            )
+        }
+        override val drinkRecordRepository by lazy {
+            DrinkRecordRepositoryImpl(
+                database.drinkRecordDao(),
+                database.drinkRecordWithTypeDao()
+            )
+        }
+        override val drinkTypeRepository by lazy { DrinkTypeRepositoryImpl(database.drinkTypeDao()) }
     }
 
 
@@ -37,7 +48,11 @@ class BevrApplication : Application() {
         super.onCreate()
 
         database = Room.databaseBuilder(
-            context = applicationContext, klass = BevrDatabase::class.java, name = DATABASE_NAME
-        ).build()
+            context = applicationContext,
+            klass = BevrDatabase::class.java,
+            name = DATABASE_NAME
+        )
+            .createFromAsset("bevr.db")
+            .build()
     }
 }
