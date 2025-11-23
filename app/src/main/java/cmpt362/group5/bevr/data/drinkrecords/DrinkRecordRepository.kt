@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
  * Defines the operations that can be performed on drink records
  */
 interface DrinkRecordRepository {
-    fun getDrinkRecords(): Flow<List<DrinkRecord>>
-    suspend fun createDrinkRecord(drinkRecord: DrinkRecord)
+    fun getDrinkRecordsWithType(): Flow<List<DrinkRecordWithType>>
+    suspend fun createDrinkRecord(drinkRecord: DrinkRecord): Long
     suspend fun deleteDrinkRecord(drinkRecord: DrinkRecord)
 }

@@ -75,6 +75,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation(libs.coil.compose)
 
     /**
      * Google Maps dependencies
@@ -82,6 +83,11 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.maps.compose.utils)
     implementation(libs.maps.compose.widgets)
+
+    /**
+     * Location dependencies
+     */
+    implementation(libs.play.services.location)
 }
 
 secrets {
