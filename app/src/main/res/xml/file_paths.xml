@@ -1,5 +1,4 @@
 <paths>
-    <cache-path
-        name="images"
-        path="images/" />
+    <files-path name="images" path="drink_record_images/" />
+    <cache-path name="cache_images" path="images/" />
 </paths>
