@@ -220,17 +220,17 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
             confirmButton = {
                 Button(
                     onClick = {
-                        shouldShowCameraPermissionRationale = false
-                        permissionRequestLauncher.launch(Manifest.permission.CAMERA)
+                        shouldShowLocationPermissionRationale = false
+                        multiplePermissionRequestLauncher.launch(locationPermissions)
                     }
                 ) { Text("Allow") }
             },
             dismissButton = {
                 Button(
-                    onClick = { shouldShowCameraPermissionRationale = false }
+                    onClick = { shouldShowLocationPermissionRationale = false }
                 ) { Text("No") }
             },
-            onDismissRequest = { shouldShowCameraPermissionRationale = false },
+            onDismissRequest = { shouldShowLocationPermissionRationale = false },
         )
     }
 
