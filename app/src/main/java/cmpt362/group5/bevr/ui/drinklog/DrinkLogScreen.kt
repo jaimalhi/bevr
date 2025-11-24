@@ -76,8 +76,8 @@ fun RatingStars(rating: Int) {
 
 @Composable
 fun DrinkLogListItem(record: DrinkRecordWithType, onDelete: (DrinkRecord) -> Unit, imageRepository: DrinkRecordImageRepository) {
-    val drink = record.drinkRecord       // The raw DrinkRecord
-    val type = record.drinkType         // The related DrinkType
+    val drink = record.drinkRecord
+    val type = record.drinkType
 
     val formatter = SimpleDateFormat("MMM d, yyyy 'at' h:mm a")
     val formattedTimestamp = formatter.format(drink.timestamp)
@@ -128,41 +128,6 @@ fun DrinkLogListItem(record: DrinkRecordWithType, onDelete: (DrinkRecord) -> Uni
         }
     }
 }
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun DrinkLogList() {
-//
-//    // Fake DrinkType for preview
-//    val fakeDrinkType = DrinkType(
-//        id = 0,
-//        name = "Coffee",
-//        icon = DrinkTypeIcon.COFFEE
-//    )
-//
-//    // Fake records wrapped into DrinkRecordWithType
-//    val records = (1L..20L).map { i ->
-//        DrinkRecordWithType(
-//            drinkRecord = DrinkRecord(
-//                id = i,
-//                drinkTypeId = 0,
-//                timestamp = Date(),
-//                name = "Sample Drink #$i",
-//                latitude = 0.0,
-//                longitude = 0.0,
-//                rating = (0..5).random()
-//            ),
-//            drinkType = fakeDrinkType
-//        )
-//    }
-//
-//    LazyColumn(modifier = Modifier.fillMaxWidth()) {
-//        items(records) { record ->
-////            DrinkLogListItem(record, )
-//        }
-//    }
-//}
-
 
 /**
  * The screen that display all of the drink records the the user entered.
