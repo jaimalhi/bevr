@@ -65,9 +65,7 @@ fun DrinkBreakdownChart(
 
     LaunchedEffect(values) {
         modelProducer.runTransaction {
-            columnSeries {
-                series(values)
-            }
+            columnSeries { series(values) }
         }
     }
 
