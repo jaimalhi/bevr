@@ -10,14 +10,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import cmpt362.group5.bevr.BevrApplication
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordWithType
+import cmpt362.group5.bevr.data.usersettings.BEVERAGE_DEFINITIONS
 import cmpt362.group5.bevr.data.usersettings.DEFAULT_AVATAR_ID
 import cmpt362.group5.bevr.data.usersettings.UserSettings
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
-import cmpt362.group5.bevr.data.usersettings.BEVERAGE_DEFINITIONS
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class ProfileUiState(
@@ -35,7 +32,7 @@ class ProfileViewModel(
 ) : ViewModel() {
 
     companion object {
-        const val LOG_TAG = "ProfileViewModel"
+        private const val LOG_TAG = "ProfileViewModel"
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -58,9 +55,7 @@ class ProfileViewModel(
                 drinkRecordRepository.getDrinkRecordsWithType()
             ) { settings, records ->
                 buildProfileUiState(settings, records)
-            }.collect { state ->
-                _uiState.value = state
-            }
+            }.collect { _uiState.value = it }
         }
     }
 
@@ -69,50 +64,48 @@ class ProfileViewModel(
         records: List<DrinkRecordWithType>
     ): ProfileUiState {
 
-        val totalDrinks = records.size
+        val total = records.size
 
-        val favouriteDrinkType = records
-            .groupBy { it.drinkType.name }
-            .maxByOrNull { (_, recs) -> recs.size }
-            ?.key ?: "-"
-
-        val countsByKey: Map<String, Int> = records
-            .groupingBy { drinkTypeNameToKey(it.drinkType.name) }
-            .eachCount()
-
-        val activeKeys = settings.activeBeverages
-
-        val filteredCounts = if (activeKeys.isEmpty()) {
-            countsByKey
-        } else {
-            countsByKey.filter { (key, _) -> key in activeKeys }
+        // Map raw DrinkType.name → canonical ("coffee","tea","juice","liquor","boba")
+        val canonicalKeys = records.map { rec ->
+            drinkTypeNameToKey(rec.drinkType.name)
         }
 
-        Log.d(
-            LOG_TAG,
-            "Profile built -> total=$totalDrinks, fav=$favouriteDrinkType, " +
-                    "active=$activeKeys, rawCounts=$countsByKey, filtered=$filteredCounts"
+        // Count occurrences
+        val countsByKey = canonicalKeys.groupingBy { it }.eachCount()
+
+        // Favourite drink = most common canonical group
+        val favouriteKey = countsByKey.maxByOrNull { it.value }?.key
+        val favouriteLabel =
+            favouriteKey?.let { key ->
+                BEVERAGE_DEFINITIONS.firstOrNull { it.key == key }?.label ?: key
+            } ?: "-"
+
+        // Apply active beverage filter
+        val activeKeys = settings.activeBeverages
+        val filteredCounts =
+            if (activeKeys.isEmpty()) countsByKey
+            else countsByKey.filter { it.key in activeKeys }
+
+        Log.d(LOG_TAG,
+            "Profile summary -> total=$total favourite=$favouriteLabel raw=$countsByKey filtered=$filteredCounts"
         )
 
         return ProfileUiState(
             isLoading = false,
             displayName = settings.displayName,
             avatarId = settings.avatarId,
-            totalDrinks = totalDrinks,
-            favouriteDrinkType = favouriteDrinkType,
+            totalDrinks = total,
+            favouriteDrinkType = favouriteLabel,
             drinkTypeCounts = filteredCounts,
         )
     }
 
-    /**
-     * Converts database drinkType.name -> settings key using BEVERAGE_DEFINITIONS.
-     * This guarantees one canonical mapping across the whole app.
-     */
+    /** Canonical mapping using your new dbNames list */
     private fun drinkTypeNameToKey(name: String): String {
         val normalized = name.trim().lowercase()
-
         return BEVERAGE_DEFINITIONS
-            .firstOrNull { def -> def.dbNames.contains(normalized) }
+            .firstOrNull { it.dbNames.contains(normalized) }
             ?.key ?: normalized
     }
 }
