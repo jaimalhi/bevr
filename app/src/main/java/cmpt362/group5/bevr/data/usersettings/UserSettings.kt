@@ -81,4 +81,9 @@ data class UserSettings(
      * (e.g. "coffee", "tea", "juice", "liquor", "boba").
      */
     val activeBeverages: Set<String> = DEFAULT_ACTIVE_BEVERAGES,
+    /**
+     * The currently selected theme (matches one of the drink keys).
+     * Starts as "default" bevr theme.
+     */
+    val selectedTheme: String = "default"
 )

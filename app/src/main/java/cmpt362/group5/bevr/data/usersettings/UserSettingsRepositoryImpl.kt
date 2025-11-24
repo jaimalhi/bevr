@@ -28,6 +28,8 @@ class UserSettingsRepositoryImpl(
         val DISPLAY_NAME = stringPreferencesKey("display_name")
         val AVATAR_ID = intPreferencesKey("avatar_id")
         val ACTIVE_BEVERAGES = stringSetPreferencesKey("active_beverages")
+        val SELECTED_THEME = stringPreferencesKey("selected_theme")
+
     }
 
     /**
@@ -43,11 +45,14 @@ class UserSettingsRepositoryImpl(
         } else {
             storedSet
         }
+        val selectedTheme = preferences[Keys.SELECTED_THEME] ?: DEFAULT_ACTIVE_BEVERAGES.firstOrNull() ?: "coffee"
+
 
         val settings = UserSettings(
             displayName = displayName,
             avatarId = avatarId,
             activeBeverages = activeBeverages,
+            selectedTheme = selectedTheme,
         )
 
         Log.d(TAG, "Loaded settings from DataStore: $settings")
@@ -63,6 +68,7 @@ class UserSettingsRepositoryImpl(
             preferences[Keys.DISPLAY_NAME] = settings.displayName
             preferences[Keys.AVATAR_ID] = settings.avatarId
             preferences[Keys.ACTIVE_BEVERAGES] = settings.activeBeverages
+            preferences[Keys.SELECTED_THEME] = settings.selectedTheme
         }
     }
 }
