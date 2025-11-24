@@ -24,11 +24,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
+import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import cmpt362.group5.bevr.ui.drinkentry.DrinkEntryScreen
 import cmpt362.group5.bevr.ui.drinkselect.DrinkSelectDialog
 import cmpt362.group5.bevr.ui.drinklog.DrinkLogScreen
@@ -78,13 +80,16 @@ enum class NavItem(
     PROFILE(Route.Profile, "Profile", Icons.Default.AccountCircle, "Profile"),
 }
 
-@Preview
+//@Preview
 @Composable
 fun Content() {
     val navController = rememberNavController()
     val startNavItem = NavItem.DRINK_ENTRY
     var selectedNavItem by rememberSaveable { mutableIntStateOf(startNavItem.ordinal) }
-    AppTheme {
+    val context = LocalContext.current
+    val userSettingsRepository = (context.applicationContext as BevrApplication)
+        .container.userSettingsRepository
+    AppTheme(userSettingsRepository = userSettingsRepository) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
@@ -143,7 +148,5 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    AppTheme {
-        Greeting("Android")
-    }
+
 }
