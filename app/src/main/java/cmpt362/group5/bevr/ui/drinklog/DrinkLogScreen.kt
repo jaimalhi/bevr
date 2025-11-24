@@ -1,5 +1,6 @@
 package cmpt362.group5.bevr.ui.drinklog
 
+import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -9,37 +10,121 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
+import DrinkLogViewModel
+import android.net.Uri
+import cmpt362.group5.bevr.BevrApplication
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import cmpt362.group5.bevr.R
+
+import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordWithType
+import coil3.compose.AsyncImage
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import cmpt362.group5.bevr.data.images.DrinkRecordImageRepository
+
 
 @Composable
-fun DrinkLogListItem(record: DrinkRecord) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-    ) {
-        Text("Record ${record.id}",Modifier.padding(16.dp))
+fun RatingStars(rating: Int) {
+    Row {
+        for (i in 1..5) {
+
+            if (rating >= i) {
+                // Full star
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700)  //gold
+                )
+            }
+
+            else {
+                // Hollow star
+                Icon(
+                    imageVector = Icons.Filled.StarBorder,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700)
+                )
+            }
+
+
+
+        }
     }
 }
 
-@Preview
+
 @Composable
-fun DrinkLogList() {
-    val records = (1..20L).map { i -> DrinkRecord(
-        i,
-        drinkTypeId = 0,
-        name = "Test $i",
-        longitude = 0.0,
-        latitude = 0.0,
-        rating = 1,
-    ) }
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        items(records) {
-            DrinkLogListItem(it)
+fun DrinkLogListItem(record: DrinkRecordWithType, onDelete: (DrinkRecord) -> Unit, imageRepository: DrinkRecordImageRepository) {
+    val drink = record.drinkRecord
+    val type = record.drinkType
+
+    val formatter = SimpleDateFormat("MMM d, yyyy 'at' h:mm a")
+    val formattedTimestamp = formatter.format(drink.timestamp)
+
+    // Get the image URI, if exists
+    val imageUri: Uri? = runCatching {
+        imageRepository.getImageUriForDrinkRecord(drink)
+    }.getOrNull()
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = 11.dp)
+    ) {
+        Row(modifier = Modifier.padding(12.dp)) {
+            // Left column for text and stars
+            Column(
+                modifier = Modifier
+                    .weight(1f) // Take all remaining horizontal space
+                    .padding(end = 8.dp)
+            ) {
+                Text(
+                    text = "Drink type: ${type.name}\n" +
+                            "Name: ${drink.name}\n" +
+                            "$formattedTimestamp\n" +
+                            "Rating: ${drink.rating}/5"
+                )
+
+                RatingStars(drink.rating)
+
+                Row(modifier = Modifier.padding(top = 8.dp)) {
+                    androidx.compose.material3.Button(
+                        onClick = { onDelete(drink) }
+                    ) {
+                        Text("Delete")
+                    }
+                }
+            }
+
+            // Right side image
+            AsyncImage(
+                model = imageUri ?: R.drawable.beer_mug_svgrepo_com,
+                contentDescription = "Drink image",
+                modifier = Modifier
+                    .height(140.dp)
+                    .clip(RectangleShape)
+            )
         }
     }
 }
@@ -47,7 +132,50 @@ fun DrinkLogList() {
 /**
  * The screen that display all of the drink records the the user entered.
  */
+// This Opt-in is required for Material 3's TopAppBar
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrinkLogScreen(drinkLogViewModel: DrinkLogViewModel = viewModel(factory = DrinkLogViewModel.Factory)) {
-    DrinkLogList()
+fun DrinkLogScreen() {
+    val app = LocalContext.current.applicationContext as BevrApplication
+    val viewModel: DrinkLogViewModel = viewModel(
+        factory = DrinkLogViewModel.Factory(
+            app.container.drinkRecordRepository,
+            app.container.drinkRecordImageRepository
+        )
+    )
+    val records by viewModel.drinkRecords.collectAsState(emptyList())
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Your Drink Log",
+                        modifier = Modifier.fillMaxWidth().offset(y = (-11).dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 40.sp
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                )
+            )
+        }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            items(records) { record ->
+                DrinkLogListItem(
+                    record,
+                    onDelete = { drink ->
+                        viewModel.deleteDrinkRecord(drink)
+                    },
+                    imageRepository = app.container.drinkRecordImageRepository
+                )
+            }
+        }
+    }
 }
+
