@@ -73,7 +73,6 @@ fun DrinkBreakdownChart(
     val bottomLabelComponent = rememberAxisLabelComponent(
         textSize = 10.sp,
         lineCount = 1,
-        margins = insets(horizontal = 2.dp, vertical = 2.dp),
     )
 
     val bottomFormatter = remember(labels) {
