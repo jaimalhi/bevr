@@ -49,10 +49,11 @@
       <style>
          html {
             scroll-behavior: smooth;
-            body {
-               min-width: 480px;
-               overflow-x: hidden;
-            }
+         }
+
+         body {
+            min-width: 480px;
+            overflow-x: hidden;
          }
 
          .material-symbols-outlined {
@@ -380,7 +381,7 @@
                               class="rounded-lg h-80 w-full"
                               src="https://www.youtube.com/embed/qjl6hmcpdQI?si=yWDnNwPd15ZWcdpK"
                               title="YouTube video player"
-                              frameborder="0"
+                              style="border: 0"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                               referrerpolicy="strict-origin-when-cross-origin"
                               allowfullscreen></iframe>
@@ -396,7 +397,7 @@
                               class="rounded-lg h-80 w-full"
                               src="https://www.youtube.com/embed/C6ITJwtHAko?si=_dfapzPptrWniTQy"
                               title="YouTube video player"
-                              frameborder="0"
+                              style="border: 0"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                               referrerpolicy="strict-origin-when-cross-origin"
                               allowfullscreen></iframe>
@@ -412,7 +413,7 @@
                               class="rounded-lg h-80 w-full"
                               src="https://www.youtube.com/embed/IZTHC9_kguk?si=6UBeBD4JZDm50Usw"
                               title="YouTube video player"
-                              frameborder="0"
+                              style="border: 0"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                               referrerpolicy="strict-origin-when-cross-origin"
                               allowfullscreen></iframe>
@@ -540,6 +541,11 @@
             </div>
          </div>
       </div>
-      <script src="./index.js"></script>
+      <script lang="ts">
+         const yearElement = document.getElementById("current-year");
+         if (yearElement) {
+            yearElement.textContent = new Date().getFullYear();
+         }
+      </script>
    </body>
 </html>
