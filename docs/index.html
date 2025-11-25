@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="icon" href="./assets/bevr_favicon.png" />
+      <title>Bevr - Discover Your Next Favorite Beverage</title>
+      <meta
+         name="description"
+         content="Bevr is a modern Android app that helps you track, discover, and save your favorite beverages with a simple, powerful interface." />
+
+      <!-- Tailwind -->
+      <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+      <!-- Fonts -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+         href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap"
+         rel="stylesheet" />
+      <link
+         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0..200"
+         rel="stylesheet" />
+
+      <script>
+         tailwind.config = {
+            darkMode: "class",
+            theme: {
+               extend: {
+                  colors: {
+                     primary: "#137fec",
+                     "background-light": "#f6f7f8",
+                     "background-dark": "#101922",
+                  },
+                  fontFamily: {
+                     display: ["Manrope", "sans-serif"],
+                  },
+                  borderRadius: {
+                     DEFAULT: "0.25rem",
+                     lg: "0.5rem",
+                     xl: "0.75rem",
+                     full: "9999px",
+                  },
+               },
+            },
+         };
+      </script>
+
+      <style>
+         html {
+            scroll-behavior: smooth;
+         }
+
+         body {
+            min-width: 480px;
+            overflow-x: hidden;
+         }
+
+         .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+         }
+      </style>
+   </head>
+
+   <body
+      class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-200">
+      <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+         <div class="flex h-full grow flex-col items-center py-5">
+            <!-- TopNavBar -->
+            <header
+               id="home"
+               class="fixed w-full top-0 z-50 flex items-center justify-between border-b border-solid border-gray-400 bg-background-light/80 px-6 py-3 text-primary backdrop-blur-sm dark:border-gray-700/80 dark:bg-background-dark/80 rounded-md">
+               <a
+                  href="https://jaimalhi.github.io/bevr/"
+                  class="flex items-center gap-3 hover:text-indigo-500 transition-colors">
+                  <div class="size-6">
+                     <svg
+                        fill="none"
+                        viewBox="0 0 48 48"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path
+                           fill="currentColor"
+                           fill-rule="evenodd"
+                           clip-rule="evenodd"
+                           d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" />
+                     </svg>
+                  </div>
+                  <h1 class="text-2xl font-bold leading-tight tracking-tight">Bevr</h1>
+               </a>
+
+               <nav class="hidden flex-1 justify-end gap-8 sm:flex" aria-label="Main navigation">
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#demos"
+                     >Demos</a
+                  >
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#features"
+                     >Features</a
+                  >
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#presentations"
+                     >Presentations</a
+                  >
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#technical"
+                     >Technical</a
+                  >
+               </nav>
+            </header>
+
+            <div class="flex w-full max-w-5xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
+               <main class="flex flex-col gap-12 md:gap-20">
+                  <!-- Hero Section -->
+                  <section class="mt-10 @container">
+                     <div
+                        class="flex flex-col gap-6 px-4 pb-10 md:py-10 @[480px]:gap-8 @[864px]:flex-row-reverse">
+                        <div class="flex w-full flex-1 items-center justify-center">
+                           <img
+                              class="max-w-xs object-contain md:max-w-sm lg:max-w-md rounded-xl shadow-sm"
+                              src="./assets/bevr_logo.svg"
+                              alt="Bevr Logo" />
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-6 @[480px]:min-w-[400px] @[480px]:gap-8 @[864px]:justify-center">
+                           <div class="flex flex-col gap-2 text-left">
+                              <h2
+                                 class="text-4xl font-extrabold leading-tight tracking-tight text-[#111418] dark:text-white @[480px]:text-5xl pb-2">
+                                 Discover Your Next Favorite Beverage
+                              </h2>
+                              <p
+                                 class="text-base leading-normal text-gray-700 dark:text-gray-300 @[480px]:text-lg">
+                                 Effortlessly track, discover, and share beverages with a community
+                                 of enthusiasts. Your ultimate companion for every sip.
+                              </p>
+                           </div>
+
+                           <div class="flex flex-wrap gap-3">
+                              <a
+                                 href="./assets/bevr.apk"
+                                 download
+                                 class="flex h-10 min-w-[120px] max-w-[260px] items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white transition-opacity hover:opacity-90 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
+                                 <span class="truncate">Download APK</span>
+                              </a>
+
+                              <a
+                                 href="https://github.com/jaimalhi/bevr/"
+                                 class="flex h-10 min-w-[120px] max-w-[260px] items-center justify-center overflow-hidden rounded-lg bg-gray-200 px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#111418] transition-colors hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
+                                 <span class="truncate">View on GitHub</span>
+                              </a>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+
+                  <!-- Demos Section -->
+                  <section id="demos">
+                     <h2
+                        class="px-4 pb-3 pt-5 text-[22px] font-bold leading-tight tracking-tight text-[#111418] dark:text-white">
+                        See Bevr in Action
+                     </h2>
+
+                     <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div
+                           class="flex aspect-[512/1080] flex-col justify-end gap-3 rounded-xl bg-cover bg-center p-4 transition-transform hover:scale-105"
+                           aria-label="Screenshot of the Bevr app home screen showing a curated list of beverages."
+                           style="
+                              background-image: linear-gradient(
+                                    0deg,
+                                    rgba(0, 0, 0, 0.4) 0%,
+                                    rgba(0, 0, 0, 0) 100%
+                                 ),
+                                 url('./assets/demo/add-drink-demo.png');
+                           ">
+                           <p class="text-base font-bold leading-tight text-white">
+                              Add New Beverages
+                           </p>
+                        </div>
+
+                        <div
+                           class="flex aspect-[512/1080] flex-col justify-end gap-3 rounded-xl bg-cover bg-center p-4 transition-transform hover:scale-105"
+                           aria-label="Screenshot of the Bevr discover page with categories and suggestions."
+                           style="
+                              background-image: linear-gradient(
+                                    0deg,
+                                    rgba(0, 0, 0, 0.4) 0%,
+                                    rgba(0, 0, 0, 0) 100%
+                                 ),
+                                 url('./assets/demo/log-demo.png');
+                           ">
+                           <p class="text-base font-bold leading-tight text-white">
+                              View Saved Beverages
+                           </p>
+                        </div>
+
+                        <div
+                           class="flex aspect-[512/1080] flex-col justify-end gap-3 rounded-xl bg-cover bg-center p-4 transition-transform hover:scale-105"
+                           aria-label="Screenshot showing a user's collection of favorite beverages in the Bevr app."
+                           style="
+                              background-image: linear-gradient(
+                                    0deg,
+                                    rgba(0, 0, 0, 0.4) 0%,
+                                    rgba(0, 0, 0, 0) 100%
+                                 ),
+                                 url('./assets/demo/theme-select-demo.png');
+                           ">
+                           <p class="text-base font-bold leading-tight text-white">
+                              Personalize Your Theme
+                           </p>
+                        </div>
+
+                        <div
+                           class="flex aspect-[512/1080] flex-col justify-end gap-3 rounded-xl bg-cover bg-center p-4 transition-transform hover:scale-105"
+                           aria-label="Screenshot of the Bevr share feature, allowing users to send recommendations."
+                           style="
+                              background-image: linear-gradient(
+                                    0deg,
+                                    rgba(0, 0, 0, 0.4) 0%,
+                                    rgba(0, 0, 0, 0) 100%
+                                 ),
+                                 url('./assets/demo/profile-demo.png');
+                           ">
+                           <p class="text-base font-bold leading-tight text-white">
+                              View Profile & Statistics
+                           </p>
+                        </div>
+                     </div>
+                  </section>
+
+                  <!-- Features Section -->
+                  <section id="features" class="flex flex-col gap-10 px-4 py-10 @container">
+                     <div class="flex flex-col gap-4">
+                        <h2
+                           class="w-100 text-[32px] font-extrabold leading-tight tracking-tight text-[#111418] dark:text-white @[480px]:text-4xl">
+                           Powerful Features, Simple Interface
+                        </h2>
+                        <hr class="border-gray-500" />
+                        <p class="w-100 text-base leading-normal text-gray-700 dark:text-gray-300">
+                           Bevr is packed with features designed to enhance your beverage
+                           experience, from discovery to sharing.
+                        </p>
+                     </div>
+
+                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <span
+                              class="material-symbols-outlined text-3xl text-primary"
+                              aria-hidden="true"
+                              >cloud_sync</span
+                           >
+                           <div class="flex flex-col gap-1">
+                              <h3
+                                 class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                                 Real-time Updates
+                              </h3>
+                              <p class="text-sm leading-normal text-gray-600 dark:text-gray-400">
+                                 Get the latest information on new and trending beverages instantly.
+                              </p>
+                           </div>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <span
+                              class="material-symbols-outlined text-3xl text-primary"
+                              aria-hidden="true"
+                              >chef_hat</span
+                           >
+                           <div class="flex flex-col gap-1">
+                              <h3
+                                 class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                                 Generate Ingredients & Recipes
+                              </h3>
+                              <p class="text-sm leading-normal text-gray-600 dark:text-gray-400">
+                                 Smart suggestions based on previously saved beverages to easily
+                                 recreate your favorites.
+                              </p>
+                           </div>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <span
+                              class="material-symbols-outlined text-3xl text-primary"
+                              aria-hidden="true"
+                              >search</span
+                           >
+                           <div class="flex flex-col gap-1">
+                              <h3
+                                 class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                                 Advanced Search &amp; Filters
+                              </h3>
+                              <p class="text-sm leading-normal text-gray-600 dark:text-gray-400">
+                                 Filter by type, rating, location, and more to find exactly what
+                                 you're looking for.
+                              </p>
+                           </div>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <span
+                              class="material-symbols-outlined text-3xl text-primary"
+                              aria-hidden="true"
+                              >person</span
+                           >
+                           <div class="flex flex-col gap-1">
+                              <h3
+                                 class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                                 Personalized Ratings
+                              </h3>
+                              <p class="text-sm leading-normal text-gray-600 dark:text-gray-400">
+                                 Rate beverages to help track your preferences and discover new
+                                 favorites.
+                              </p>
+                           </div>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <span
+                              class="material-symbols-outlined text-3xl text-primary"
+                              aria-hidden="true"
+                              >bookmark</span
+                           >
+                           <div class="flex flex-col gap-1">
+                              <h3
+                                 class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                                 Personal Collection
+                              </h3>
+                              <p class="text-sm leading-normal text-gray-600 dark:text-gray-400">
+                                 Keep a digital collection of every beverage you've tried, rated,
+                                 and loved.
+                              </p>
+                           </div>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <span
+                              class="material-symbols-outlined text-3xl text-primary"
+                              aria-hidden="true"
+                              >cloud_off</span
+                           >
+                           <div class="flex flex-col gap-1">
+                              <h3
+                                 class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                                 Offline Access
+                              </h3>
+                              <p class="text-sm leading-normal text-gray-600 dark:text-gray-400">
+                                 Access your tracked beverages and lists even without an internet
+                                 connection.
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+
+                  <!-- Use Cases Section -->
+                  <section id="presentations" class="px-4 py-10">
+                     <h2
+                        class="pb-2 text-[22px] font-bold leading-tight tracking-tight text-[#111418] dark:text-white">
+                        Presentations
+                     </h2>
+                     <hr class="pb-4 border-gray-500" />
+
+                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <h3
+                              class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                              Project Pitch
+                           </h3>
+                           <iframe
+                              class="rounded-lg h-80 w-full"
+                              src="https://www.youtube.com/embed/qjl6hmcpdQI?si=yWDnNwPd15ZWcdpK"
+                              title="YouTube video player"
+                              style="border: 0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              referrerpolicy="strict-origin-when-cross-origin"
+                              allowfullscreen></iframe>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <h3
+                              class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                              Show & Tell 1
+                           </h3>
+                           <iframe
+                              class="rounded-lg h-80 w-full"
+                              src="https://www.youtube.com/embed/C6ITJwtHAko?si=_dfapzPptrWniTQy"
+                              title="YouTube video player"
+                              style="border: 0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              referrerpolicy="strict-origin-when-cross-origin"
+                              allowfullscreen></iframe>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <h3
+                              class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                              Show & Tell 2
+                           </h3>
+                           <iframe
+                              class="rounded-lg h-80 w-full"
+                              src="https://www.youtube.com/embed/IZTHC9_kguk?si=6UBeBD4JZDm50Usw"
+                              title="YouTube video player"
+                              style="border: 0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              referrerpolicy="strict-origin-when-cross-origin"
+                              allowfullscreen></iframe>
+                        </div>
+
+                        <div
+                           class="flex flex-1 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 hover:scale-105 transition-transform duration-300">
+                           <h3
+                              class="text-base font-bold leading-tight text-[#111418] dark:text-white">
+                              Final Presentation
+                           </h3>
+                           <em>Coming soon...</em>
+                        </div>
+                     </div>
+                  </section>
+
+                  <!-- Technical Overview Section -->
+                  <section id="technical" class="px-4 py-10">
+                     <h2
+                        class="pb-2 text-[22px] font-bold leading-tight tracking-tight text-[#111418] dark:text-white">
+                        Technical Overview
+                     </h2>
+                     <hr class="pb-4 border-gray-500" />
+
+                     <div class="flex flex-col gap-8 lg:flex-row">
+                        <div class="flex-1">
+                           <h3 class="mb-2 text-lg font-bold text-[#111418] dark:text-white">
+                              Tech Stack
+                           </h3>
+                           <ul class="mb-6 space-y-2">
+                              <li class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                 <span class="font-semibold text-primary">Language:</span>
+                                 Kotlin
+                              </li>
+                              <li class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                 <span class="font-semibold text-primary">UI:</span>
+                                 Jetpack Compose
+                              </li>
+                              <li class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                 <span class="font-semibold text-primary">Architecture:</span>
+                                 MVVM with Clean Architecture principles
+                              </li>
+                              <li class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                 <span class="font-semibold text-primary">Database:</span>
+                                 Room for local persistence
+                              </li>
+                              <li class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                 <span class="font-semibold text-primary">API:</span>
+                                 Google Maps for location services
+                              </li>
+                           </ul>
+
+                           <div class="flex-1">
+                              <h3 class="mb-2 text-lg font-bold text-[#111418] dark:text-white">
+                                 Threaded Design Diagram
+                              </h3>
+                              <div class="grid max-[480px]:grid-cols-1 grid-cols-2 gap-4">
+                                 <img
+                                    src="./assets/threaded-diagrams/add-drink-page.jpg"
+                                    alt="Architecture Diagram 1"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                                 <img
+                                    src="./assets/threaded-diagrams/log-page.jpg"
+                                    alt="Architecture Diagram 2"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                                 <img
+                                    src="./assets/threaded-diagrams/locations-page.jpg"
+                                    alt="Architecture Diagram 3"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                                 <img
+                                    src="./assets/threaded-diagrams/profile-page.jpg"
+                                    alt="Architecture Diagram 4"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                                 <img
+                                    src="./assets/threaded-diagrams/settings-page.jpg"
+                                    alt="Architecture Diagram 5"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                                 <img
+                                    src="./assets/threaded-diagrams/theme-select.jpg"
+                                    alt="Architecture Diagram 6"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+
+                  <!-- About / Footer -->
+                  <footer
+                     id="about"
+                     class="mt-10 border-t border-gray-200 px-4 py-10 dark:border-gray-800">
+                     <div class="flex flex-col items-center justify-between gap-6 md:flex-row">
+                        <p
+                           class="text-center text-sm text-gray-600 dark:text-gray-400 md:text-left">
+                           Developed by
+                           <span class="font-bold text-primary"
+                              ><a class="hover:underline" href="https://jaimalhi.github.io/bevr/"
+                                 >Bevr</a
+                              ></span
+                           >. ©
+                           <span id="current-year"></span>
+                        </p>
+
+                        <div class="flex items-center gap-4">
+                           <!-- GitHub -->
+                           <a
+                              href="https://github.com/jaimalhi/bevr/"
+                              class="text-gray-600 transition-colors hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                              aria-label="View Bevr on GitHub">
+                              <svg
+                                 class="h-6 w-6"
+                                 fill="currentColor"
+                                 viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                 <path
+                                    fill-rule="evenodd"
+                                    clip-rule="evenodd"
+                                    d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.03-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" />
+                              </svg>
+                           </a>
+                        </div>
+                     </div>
+                  </footer>
+               </main>
+            </div>
+         </div>
+      </div>
+      <script lang="js">
+         const yearElement = document.getElementById("current-year");
+         if (yearElement) {
+            yearElement.textContent = new Date().getFullYear();
+         }
+      </script>
+   </body>
+</html>
