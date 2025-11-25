@@ -10,7 +10,7 @@
 - [Show & Tell 1](https://youtu.be/C6ITJwtHAko)
 - [Show & Tell 2](https://youtu.be/IZTHC9_kguk)
 - Final Presentation - *coming soon*
-- Project Webpage - *coming soon*
+- [Project Webpage](https://jaimalhi.github.io/bevr/)
 - Project APK - *coming soon*
 
 
