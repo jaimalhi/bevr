@@ -66,54 +66,54 @@
       class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-200">
       <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
          <div class="flex h-full grow flex-col items-center py-5">
-            <div class="flex w-full max-w-5xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
-               <!-- TopNavBar -->
-               <header
-                  id="home"
-                  class="fixed w-[75vw] top-0 z-50 flex items-center justify-between border-b border-solid border-gray-400 bg-background-light/80 px-6 py-3 text-primary backdrop-blur-sm dark:border-gray-700/80 dark:bg-background-dark/80 rounded-md">
+            <!-- TopNavBar -->
+            <header
+               id="home"
+               class="fixed w-full top-0 z-50 flex items-center justify-between border-b border-solid border-gray-400 bg-background-light/80 px-6 py-3 text-primary backdrop-blur-sm dark:border-gray-700/80 dark:bg-background-dark/80 rounded-md">
+               <a
+                  href="https://jaimalhi.github.io/bevr/"
+                  class="flex items-center gap-3 hover:text-indigo-500 transition-colors">
+                  <div class="size-6">
+                     <svg
+                        fill="none"
+                        viewBox="0 0 48 48"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path
+                           fill="currentColor"
+                           fill-rule="evenodd"
+                           clip-rule="evenodd"
+                           d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" />
+                     </svg>
+                  </div>
+                  <h1 class="text-2xl font-bold leading-tight tracking-tight">Bevr</h1>
+               </a>
+
+               <nav class="hidden flex-1 justify-end gap-8 sm:flex" aria-label="Main navigation">
                   <a
-                     href="https://jaimalhi.github.io/bevr/"
-                     class="flex items-center gap-3 hover:text-indigo-500 transition-colors">
-                     <div class="size-6">
-                        <svg
-                           fill="none"
-                           viewBox="0 0 48 48"
-                           xmlns="http://www.w3.org/2000/svg"
-                           aria-hidden="true">
-                           <path
-                              fill="currentColor"
-                              fill-rule="evenodd"
-                              clip-rule="evenodd"
-                              d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" />
-                        </svg>
-                     </div>
-                     <h1 class="text-2xl font-bold leading-tight tracking-tight">Bevr</h1>
-                  </a>
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#demos"
+                     >Demos</a
+                  >
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#features"
+                     >Features</a
+                  >
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#presentations"
+                     >Presentations</a
+                  >
+                  <a
+                     class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
+                     href="#technical"
+                     >Technical</a
+                  >
+               </nav>
+            </header>
 
-                  <nav class="hidden flex-1 justify-end gap-8 md:flex" aria-label="Main navigation">
-                     <a
-                        class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
-                        href="#demos"
-                        >Demos</a
-                     >
-                     <a
-                        class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
-                        href="#features"
-                        >Features</a
-                     >
-                     <a
-                        class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
-                        href="#presentations"
-                        >Presentations</a
-                     >
-                     <a
-                        class="text-md font-medium leading-normal transition-colors hover:text-primary dark:hover:text-primary hover:scale-105 transition-transform"
-                        href="#technical"
-                        >Technical</a
-                     >
-                  </nav>
-               </header>
-
+            <div class="flex w-full max-w-5xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
                <main class="flex flex-col gap-12 md:gap-20">
                   <!-- Hero Section -->
                   <section class="mt-10 @container">
