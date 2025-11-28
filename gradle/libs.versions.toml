@@ -28,6 +28,7 @@ lifecycleLivedataKtx = "2.10.0"
 runtimeLivedata = "1.9.5"
 compose = "2.3.6"
 composeM3 = "2.3.6"
+appcompat = "1.7.1"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -65,6 +66,7 @@ secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.se
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "compose" }
 compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "composeM3" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
