@@ -47,10 +47,13 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    implementation("com.google.firebase:firebase-ai")
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.compose)
     implementation(libs.compose.m3)
+    implementation(libs.androidx.appcompat)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
