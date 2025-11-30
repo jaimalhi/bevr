@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecord
 import DrinkLogViewModel
 import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
 import cmpt362.group5.bevr.BevrApplication
 
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material3.Button
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
@@ -39,6 +41,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import cmpt362.group5.bevr.data.images.DrinkRecordImageRepository
@@ -66,9 +71,6 @@ fun RatingStars(rating: Int) {
                     tint = Color(0xFFFFD700)
                 )
             }
-
-
-
         }
     }
 }
@@ -129,6 +131,13 @@ fun DrinkLogListItem(record: DrinkRecordWithType, onDelete: (DrinkRecord) -> Uni
     }
 }
 
+// You can add this right above your DrinkLogScreen composable
+enum class DrinkLogFilterMode {
+    BY_RATING_ASCENDING,
+    MOST_RECENT,
+    BY_RATING_DESCENDING
+}
+
 /**
  * The screen that display all of the drink records the the user entered.
  */
@@ -139,11 +148,18 @@ fun DrinkLogScreen() {
     val app = LocalContext.current.applicationContext as BevrApplication
     val viewModel: DrinkLogViewModel = viewModel(
         factory = DrinkLogViewModel.Factory(
-            app.container.drinkRecordRepository,
-            app.container.drinkRecordImageRepository
+            app.container.drinkRecordRepository
         )
     )
     val records by viewModel.drinkRecords.collectAsState(emptyList())
+
+    var filterMode by remember { mutableStateOf(DrinkLogFilterMode.BY_RATING_ASCENDING) }
+
+    val filteredRecords = when (filterMode) {
+        DrinkLogFilterMode.BY_RATING_ASCENDING -> records.sortedBy { it.drinkRecord.rating }
+        DrinkLogFilterMode.MOST_RECENT -> records.sortedByDescending { it.drinkRecord.timestamp }
+        DrinkLogFilterMode.BY_RATING_DESCENDING -> records.sortedByDescending { it.drinkRecord.rating }
+    }
 
     Scaffold(
         topBar = {
@@ -163,17 +179,45 @@ fun DrinkLogScreen() {
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            items(records) { record ->
-                DrinkLogListItem(
-                    record,
-                    onDelete = { drink ->
-                        viewModel.deleteDrinkRecord(drink)
-                    },
-                    imageRepository = app.container.drinkRecordImageRepository
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Sort by:",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(onClick = { filterMode = DrinkLogFilterMode.MOST_RECENT }, modifier = Modifier.weight(1f)) {
+                        Text("Most Recent", fontSize = 12.sp)
+                    }
+                    Button(onClick = { filterMode = DrinkLogFilterMode.BY_RATING_DESCENDING }, modifier = Modifier.weight(1f)) {
+                        Text("Highest Rated", fontSize = 12.sp)
+                    }
+                    Button(onClick = { filterMode = DrinkLogFilterMode.BY_RATING_ASCENDING }, modifier = Modifier.weight(1f)) {
+                        Text("Lowest Rated", fontSize = 12.sp)
+                    }
+                }
+            }
+
+            LazyColumn {
+                items(filteredRecords) { record ->
+                    DrinkLogListItem(
+                        record,
+                        onDelete = { drink ->
+                            viewModel.deleteDrinkRecord(drink)
+                        },
+                        imageRepository = app.container.drinkRecordImageRepository
+                    )
+                }
             }
         }
     }
