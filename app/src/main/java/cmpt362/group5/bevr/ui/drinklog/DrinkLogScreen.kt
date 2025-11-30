@@ -131,7 +131,6 @@ fun DrinkLogListItem(record: DrinkRecordWithType, onDelete: (DrinkRecord) -> Uni
     }
 }
 
-// You can add this right above your DrinkLogScreen composable
 enum class DrinkLogFilterMode {
     BY_RATING_ASCENDING,
     MOST_RECENT,
