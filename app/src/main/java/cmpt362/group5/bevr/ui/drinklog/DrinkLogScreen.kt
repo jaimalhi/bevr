@@ -152,7 +152,7 @@ fun DrinkLogScreen() {
     )
     val records by viewModel.drinkRecords.collectAsState(emptyList())
 
-    var filterMode by remember { mutableStateOf(DrinkLogFilterMode.BY_RATING_ASCENDING) }
+    var filterMode by remember { mutableStateOf(DrinkLogFilterMode.MOST_RECENT) }
 
     val filteredRecords = when (filterMode) {
         DrinkLogFilterMode.BY_RATING_ASCENDING -> records.sortedBy { it.drinkRecord.rating }
