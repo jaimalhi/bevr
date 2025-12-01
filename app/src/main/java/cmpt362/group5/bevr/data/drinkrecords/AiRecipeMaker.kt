@@ -1,39 +1,30 @@
 package cmpt362.group5.bevr.data.drinkrecords
 
-import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import android.app.Application
-import android.graphics.Bitmap
-import android.net.Uri
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
-import com.google.firebase.ai.type.ImagePart
-import com.google.firebase.ai.type.ResponseModality
-import com.google.firebase.ai.type.content
-import com.google.firebase.ai.type.generationConfig
+import cmpt362.group5.bevr.BuildConfig
+import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class AiRecipeMaker : AppCompatActivity() {
+class AiRecipeMaker {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private val apiKey = BuildConfig.GEMINI_API_KEY
 
-        val model = Firebase.ai(backend = GenerativeBackend.googleAI())
-            .generativeModel("gemini-2.5-flash")
+    fun generateRecipe(coroutineScope: CoroutineScope) {
+        val model = GenerativeModel(
+            modelName = "gemini-pro",
+            apiKey = apiKey
+        )
 
-        lifecycleScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             try {
-                val prompt = "Write a short Kotlin function that adds two numbers."
+                val prompt = "Generate a creative cocktail recipe."
                 val response = model.generateContent(prompt)
-                val output = response.text  // may be null if no text output
-                Log.d("GeminiExample", "Got response: $output")
+                val output = response.text
+                Log.d("AiRecipeMaker", "Generated Recipe: $output")
             } catch (e: Exception) {
-                Log.e("GeminiExample", "Error calling Gemini", e)
+                Log.e("AiRecipeMaker", "Error generating recipe: ", e)
             }
         }
     }
