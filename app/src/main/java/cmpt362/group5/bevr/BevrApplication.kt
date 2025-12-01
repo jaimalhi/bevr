@@ -11,7 +11,7 @@ import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepositoryImpl
 import cmpt362.group5.bevr.data.images.DrinkRecordImageRepositoryImpl
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepositoryImpl
-
+import com.google.android.libraries.places.api.Places
 
 class BevrApplication : Application() {
     companion object {
@@ -52,6 +52,10 @@ class BevrApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        }
 
         database = Room.databaseBuilder(
             context = applicationContext,
