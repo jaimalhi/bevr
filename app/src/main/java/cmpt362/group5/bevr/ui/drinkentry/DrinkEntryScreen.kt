@@ -103,19 +103,37 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
     }
 
     @SuppressLint("MissingPermission")
-    fun updateLocation() {
-        locationClient.lastLocation.addOnSuccessListener { location ->
-            drinkLocation = LatLng(location.latitude, location.longitude)
-        }.addOnFailureListener { exception ->
-            Log.w(TAG, "Failed to get last location: $exception")
-            Log.i(TAG, "Getting current location instead")
-            locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-                .addOnSuccessListener { location ->
+    fun requestCurrentLocation() {
+        locationClient
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location ->
+                if (location != null) {
                     drinkLocation = LatLng(location.latitude, location.longitude)
-                }.addOnFailureListener { exception ->
-                    Log.w(TAG, "Failed to get current location: $exception")
+                } else {
+                    Log.w(TAG, "Current location is null, not updating drinkLocation")
                 }
-        }
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Failed to get current location: $exception")
+            }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun updateLocation() {
+        locationClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    drinkLocation = LatLng(location.latitude, location.longitude)
+                } else {
+                    Log.w(TAG, "Last location was null, requesting current location")
+                    requestCurrentLocation()
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Failed to get last location: $exception")
+                Log.i(TAG, "Getting current location instead")
+                requestCurrentLocation()
+            }
     }
 
     val multiplePermissionRequestLauncher = rememberLauncherForActivityResult(
