@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import cmpt362.group5.bevr.data.BevrDatabase
+import cmpt362.group5.bevr.data.ai.AiRecipeMaker
 import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepositoryImpl
 import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepositoryImpl
 import cmpt362.group5.bevr.data.images.DrinkRecordImageRepositoryImpl
@@ -41,14 +42,18 @@ class BevrApplication : Application() {
                 database.drinkRecordWithTypeDao()
             )
         }
-        override val drinkTypeRepository by lazy { DrinkTypeRepositoryImpl(database.drinkTypeDao()) }
+        override val drinkTypeRepository by lazy {
+            DrinkTypeRepositoryImpl(database.drinkTypeDao())
+        }
         override val drinkRecordImageRepository by lazy {
             DrinkRecordImageRepositoryImpl(
                 applicationContext
             )
         }
+        override val aiRecipeMaker by lazy {
+            AiRecipeMaker()
+        }
     }
-
 
     override fun onCreate() {
         super.onCreate()
@@ -65,5 +70,4 @@ class BevrApplication : Application() {
             .createFromAsset("bevr.db")
             .build()
     }
-
 }
