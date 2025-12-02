@@ -3,6 +3,7 @@ package cmpt362.group5.bevr.ui.drinkentry
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
@@ -27,22 +28,32 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -50,34 +61,40 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider.getUriForFile
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.BevrFileProvider
+import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordWithType
 import cmpt362.group5.bevr.ui.theme.IconSize
 import cmpt362.group5.bevr.ui.theme.Spacing
 import coil3.compose.rememberAsyncImagePainter
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import java.io.File
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.items
+import java.text.SimpleDateFormat
+
 private const val TAG = "DrinkEntryScreen"
 
 private const val DRINK_IMAGE_PATH = "images/new_drink.bmp"
@@ -88,6 +105,118 @@ private val locationPermissions =
 private const val DEFAULT_RATING = 3
 
 private lateinit var drinkImageFile: File
+
+@Composable
+fun NewDrinkRecordDialog(
+    newDrinkRecordWithType: DrinkRecordWithType,
+    imageUri: Uri,
+    onDismissRequest: () -> Unit
+) {
+    val (drinkRecord, type) = newDrinkRecordWithType
+    val location = LatLng(drinkRecord.latitude, drinkRecord.longitude)
+    Dialog(onDismissRequest) {
+        Card {
+            Column(
+                modifier = Modifier
+                    .padding(Spacing.Large)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
+            ) {
+                Text(
+                    text = "New Drink Logged!",
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        modifier = Modifier.size(IconSize.Standard),
+                        painter = painterResource(type.icon.resId),
+                        contentDescription = "Drink type icon."
+                    )
+                    Text(type.name, style = MaterialTheme.typography.labelMedium)
+                }
+                Text(
+                    modifier = Modifier
+                        .padding(Spacing.Medium)
+                        .dropShadow(
+                            shape = CircleShape,
+                            shadow = Shadow(
+                                radius = 10.dp,
+                                spread = 3.dp,
+                                color = MaterialTheme.colorScheme.inversePrimary,
+                                alpha = 0.2f,
+                            ),
+                        ),
+                    text = drinkRecord.name,
+                    style = MaterialTheme.typography.displayMedium
+                )
+                Text(
+                    text = SimpleDateFormat.getDateTimeInstance().format(drinkRecord.timestamp),
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Row(
+                    modifier = Modifier.height(150.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Image(
+                            modifier = Modifier.clip(MaterialTheme.shapes.medium),
+                            painter = rememberAsyncImagePainter(imageUri),
+                            contentDescription = "Image of ${drinkRecord.name}",
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Column(Modifier.weight(1f)) {
+                        GoogleMap(
+                            modifier = Modifier.clip(MaterialTheme.shapes.medium),
+                            cameraPositionState = rememberCameraPositionState {
+                                position = CameraPosition.fromLatLngZoom(location, 15f)
+                            },
+                            uiSettings = MapUiSettings(
+                                scrollGesturesEnabled = false,
+                                zoomGesturesEnabled = false,
+                                tiltGesturesEnabled = false,
+                                rotationGesturesEnabled = false,
+                                mapToolbarEnabled = false,
+                                compassEnabled = false,
+                                myLocationButtonEnabled = false,
+                                zoomControlsEnabled = false
+                            )
+                        ) {
+                            Marker(
+                                state = rememberUpdatedMarkerState(location)
+                            )
+                        }
+                    }
+                }
+                Button(onDismissRequest) { Text("Close") }
+            }
+        }
+    }
+}
+
+@Composable
+fun Map(
+    cameraPositionState: CameraPositionState,
+    onMapClick: (LatLng) -> Unit,
+    location: LatLng?,
+) {
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        onMapClick = onMapClick,
+        uiSettings = MapUiSettings(
+            scrollGesturesEnabled = true,
+            zoomControlsEnabled = true
+        )
+    ) {
+        location?.let {
+            Marker(
+                state = rememberUpdatedMarkerState(it)
+            )
+        }
+    }
+}
 
 /**
  * The screen that allows the user to enter details about the drink they just had.
@@ -116,7 +245,10 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
     }
 
     @SuppressLint("VisibleForTests")
-    fun fetchAutocompletePredictions(query: String, onResult: (List<Pair<String, String>>) -> Unit) {
+    fun fetchAutocompletePredictions(
+        query: String,
+        onResult: (List<Pair<String, String>>) -> Unit
+    ) {
         val bounds = drinkLocation?.let { latLng ->
             com.google.android.libraries.places.api.model.RectangularBounds.newInstance(
                 LatLng(latLng.latitude - 0.05, latLng.longitude - 0.05),
@@ -132,7 +264,9 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
 
         placesClient.findAutocompletePredictions(request)
             .addOnSuccessListener { response ->
-                onResult(response.autocompletePredictions.map { it.getFullText(null).toString() to it.placeId })
+                onResult(response.autocompletePredictions.map {
+                    it.getFullText(null).toString() to it.placeId
+                })
             }
             .addOnFailureListener { onResult(emptyList()) }
     }
@@ -226,6 +360,8 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
 
     var drinkName by rememberSaveable { mutableStateOf("") }
 
+    val labelDrinkNameDisplay by remember { derivedStateOf { drinkName.ifBlank { "it" } } }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { imageSaved = it }
@@ -256,6 +392,94 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
 
     val drinkTypes by viewModel.drinkTypes.collectAsStateWithLifecycle(listOf())
     var selectedDrinkTypeId by rememberSaveable { mutableStateOf<Long?>(null) }
+
+    var shouldShowLocationSearchDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (shouldShowLocationSearchDialog) {
+        Dialog(onDismissRequest = { shouldShowLocationSearchDialog = false }) {
+            Box(
+                Modifier
+                    .height(400.dp)
+                    .clip(MaterialTheme.shapes.medium)
+            ) {
+                Map(cameraPositionState, { drinkLocation = it }, drinkLocation)
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.Medium)
+                ) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            if (it.isNotBlank()) fetchAutocompletePredictions(it) { results ->
+                                autocompleteResults = results
+                            }
+                            else autocompleteResults = emptyList()
+                        },
+                        label = { Text("Search for place") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                    )
+                    // Show autocomplete results
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 200.dp) // bigger for visibility
+                            .background(MaterialTheme.colorScheme.background)
+                            .clip(MaterialTheme.shapes.medium)
+                    ) {
+                        items(autocompleteResults) { (name, placeId) ->
+                            Text(
+                                text = name,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        searchQuery = name
+                                        autocompleteResults = emptyList()
+                                        selectPlace(placeId)
+                                    }
+                                    .padding(8.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+                Button(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onClick = { shouldShowLocationSearchDialog = false }
+                ) { Text("Close") }
+            }
+        }
+    }
+
+    val newDrinkRecord by viewModel.newDrinkRecordState.collectAsStateWithLifecycle()
+
+    var rating by rememberSaveable { mutableIntStateOf(DEFAULT_RATING) }
+
+    LaunchedEffect(newDrinkRecord) { // reset everything
+        if (newDrinkRecord != null) {
+            drinkName = ""
+            selectedDrinkTypeId = null
+            drinkLocation = null
+            rating = DEFAULT_RATING
+            imageSaved = false
+        }
+    }
+
+    var shouldShowNewDrinkRecordDialog by rememberSaveable(newDrinkRecord) {
+        mutableStateOf(
+            newDrinkRecord != null
+        )
+    }
+
+    if (shouldShowNewDrinkRecordDialog) {
+        newDrinkRecord?.let { (drinkRecordWithType, uri) ->
+            NewDrinkRecordDialog(drinkRecordWithType, uri) {
+                shouldShowNewDrinkRecordDialog = false
+            }
+        }
+    }
 
     if (shouldShowCameraPermissionRationale) {
         AlertDialog(
@@ -299,8 +523,6 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         )
     }
 
-    var rating by rememberSaveable { mutableStateOf(DEFAULT_RATING) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -329,8 +551,7 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
-                .padding(Spacing.Medium),
+                .height(200.dp),
             horizontalArrangement = Arrangement.spacedBy(Spacing.Medium),
         ) {
             Box(
@@ -366,19 +587,10 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
                     .weight(1f)
                     .clip(MaterialTheme.shapes.medium)
             ) {
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    onMapClick = { drinkLocation = it },
-                    uiSettings = com.google.maps.android.compose.MapUiSettings(
-                        scrollGesturesEnabled = true,
-                        zoomControlsEnabled = true
-                    )
-                ) {
-                    drinkLocation?.let {
-                        Marker(
-                            state = rememberUpdatedMarkerState(it)
-                        )
+                if (!shouldShowLocationSearchDialog) {
+                    Map(cameraPositionState, { drinkLocation = it }, drinkLocation)
+                    FilledIconButton({ shouldShowLocationSearchDialog = true }) {
+                        Icon(Icons.Default.Search, "Search locations icon.")
                     }
                 }
             }
@@ -387,56 +599,19 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(Spacing.Medium),
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(Spacing.Medium),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // search box
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    if (it.isNotBlank()) fetchAutocompletePredictions(it) { results ->
-                        autocompleteResults = results
-                    }
-                    else autocompleteResults = emptyList()
-                },
-                label = { Text("Search for place") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Show autocomplete results
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 150.dp) // bigger for visibility
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clip(MaterialTheme.shapes.medium)
-            ){
-                items(autocompleteResults) { (name, placeId) ->
-                    Text(
-                        text = name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                searchQuery = name
-                                autocompleteResults = emptyList()
-                                selectPlace(placeId)
-                            }
-                            .padding(8.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
             Text(
-                text = "What type is it?",
+                text = "What type of drink is ${labelDrinkNameDisplay}?",
                 style = MaterialTheme.typography.labelLarge
             )
             LazyVerticalGrid(
-                modifier = Modifier.heightIn(max = 250.dp)
-                .fillMaxWidth(),
-                columns = GridCells.Fixed(4)
+                modifier = Modifier
+                    .heightIn(max = 250.dp)
+                    .fillMaxWidth(),
+                columns = GridCells.Fixed(6)
             ) {
                 items(drinkTypes) { drinkType ->
                     Column(
@@ -463,7 +638,7 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
                 }
             }
             Text(
-                text = "Give it a rating",
+                text = "How would you rate ${labelDrinkNameDisplay}?",
                 style = MaterialTheme.typography.labelLarge
             )
             Row(
