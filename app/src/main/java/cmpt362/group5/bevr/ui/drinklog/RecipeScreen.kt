@@ -5,13 +5,12 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -32,12 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cmpt362.group5.bevr.BevrApplication
 import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.toClipEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +72,10 @@ fun RecipeScreen(
                 title = { Text("Generated Recipe") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
@@ -93,12 +95,14 @@ fun RecipeScreen(
 
                 uiState.recipe != null -> {
                     val recipe = uiState.recipe!!
+                    val scrollState = rememberScrollState()
 
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
+                        // STATIC HEADER: title + desc + prep time
                         Text(
                             text = recipe.recipeName,
                             style = MaterialTheme.typography.headlineMedium,
@@ -116,61 +120,59 @@ fun RecipeScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = "Ingredients",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        LazyColumn(
+                        // SCROLLABLE SECTION: ingredients + steps + serving
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 200.dp)
+                                .weight(1f) // take all remaining space
+                                .verticalScroll(scrollState)
                         ) {
-                            items(recipe.ingredients) { ing ->
+                            // Ingredients
+                            Text(
+                                text = "Ingredients",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            recipe.ingredients.forEach { ing ->
                                 Text("- ${ing.amount} ${ing.item}")
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = "Steps",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 200.dp)
-                        ) {
-                            items(recipe.steps.withIndex().toList()) { (index, step) ->
+                            // Steps
+                            Text(
+                                text = "Steps",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            recipe.steps.forEachIndexed { index, step ->
                                 Text("${index + 1}. $step")
                             }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Serving details
+                            Text(
+                                text = "Serving Details",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Glassware: ${recipe.servingDetails.glassware}")
+                            Text("Garnish: ${recipe.servingDetails.garnish}")
+                            Text("Twist: ${recipe.servingDetails.twistSuggestion}")
+
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = "Serving Details",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Glassware: ${recipe.servingDetails.glassware}")
-                        Text("Garnish: ${recipe.servingDetails.garnish}")
-                        Text("Twist: ${recipe.servingDetails.twistSuggestion}")
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
+                        // STATIC BOTTOM: Copy button
                         Button(
                             onClick = {
                                 val text = recipe.toClipboardText()
                                 scope.launch {
-                                    // Create a ClipData and convert it to a ClipEntry for the new Clipboard API
                                     val clipData = ClipData.newPlainText("Bevr recipe", text)
                                     val clipEntry = clipData.toClipEntry()
                                     clipboard.setClipEntry(clipEntry)
@@ -187,7 +189,7 @@ fun RecipeScreen(
                 }
 
                 else -> {
-                    // Edge case: not loading, no recipe, no error – nothing to render.
+                    // No loading, no recipe, no error - nothing to render
                 }
             }
         }
