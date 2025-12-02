@@ -30,10 +30,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
-import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
+import androidx.navigation.toRoute
 import cmpt362.group5.bevr.ui.drinkentry.DrinkEntryScreen
 import cmpt362.group5.bevr.ui.drinkselect.DrinkSelectDialog
 import cmpt362.group5.bevr.ui.drinklog.DrinkLogScreen
+import cmpt362.group5.bevr.ui.drinklog.RecipeScreen
 import cmpt362.group5.bevr.ui.locations.LocationsScreen
 import cmpt362.group5.bevr.ui.profile.ProfileScreen
 import cmpt362.group5.bevr.ui.settings.SettingsScreen
@@ -68,6 +69,10 @@ interface Route {
 
     @Serializable
     object Profile : Route
+
+    // New recipe sub-page, takes a drinkRecordId
+    @Serializable
+    data class Recipe(val drinkRecordId: Long) : Route
 }
 
 enum class NavItem(
@@ -113,7 +118,13 @@ fun Content() {
                 startDestination = Route.DrinkEntry,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                composable<Route.DrinkLog> { DrinkLogScreen() }
+                composable<Route.DrinkLog> {
+                    DrinkLogScreen(
+                        onOpenRecipe = { recordId ->
+                            navController.navigate(Route.Recipe(recordId))
+                        }
+                    )
+                }
                 composable<Route.Locations> { LocationsScreen() }
                 composable<Route.DrinkEntry> { DrinkEntryScreen() }
                 dialog<Route.DrinkSelect> { DrinkSelectDialog() }
@@ -129,6 +140,15 @@ fun Content() {
                 // Settings is only reachable from Profile, not in bottom nav
                 composable<Route.Settings> {
                     SettingsScreen(
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+
+                // New recipe screen
+                composable<Route.Recipe> { backStackEntry ->
+                    val args = backStackEntry.toRoute<Route.Recipe>()
+                    RecipeScreen(
+                        drinkRecordId = args.drinkRecordId,
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
