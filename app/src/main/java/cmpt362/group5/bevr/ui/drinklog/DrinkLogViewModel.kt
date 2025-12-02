@@ -1,4 +1,5 @@
-import android.net.Uri
+package cmpt362.group5.bevr.ui.drinklog
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope

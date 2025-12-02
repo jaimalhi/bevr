@@ -4,6 +4,7 @@ import cmpt362.group5.bevr.data.drinkrecords.DrinkRecordRepository
 import cmpt362.group5.bevr.data.drinktypes.DrinkTypeRepository
 import cmpt362.group5.bevr.data.images.DrinkRecordImageRepository
 import cmpt362.group5.bevr.data.usersettings.UserSettingsRepository
+import cmpt362.group5.bevr.data.ai.AiRecipeMaker
 
 /**
  * Contains data sources and various values intended to be used by the entire application and accessible anywhere in the application.
@@ -15,4 +16,5 @@ interface AppContainer {
     val drinkRecordRepository: DrinkRecordRepository
     val drinkTypeRepository: DrinkTypeRepository
     val drinkRecordImageRepository: DrinkRecordImageRepository
+    val aiRecipeMaker: AiRecipeMaker
 }
