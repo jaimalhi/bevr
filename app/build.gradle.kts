@@ -29,7 +29,10 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GEMINI_API_KEY", "\"${secretsProperties.getProperty("GEMINI_API_KEY", "")}\"")
+        val apiKey = secretsProperties.getProperty("GEMINI_API_KEY")
+            ?: throw GradleException("GEMINI_API_KEY not found in secrets.properties")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
+
     }
 
     buildFeatures {
