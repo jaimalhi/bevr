@@ -1,6 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.Properties
-import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android.application)
@@ -10,15 +8,7 @@ plugins {
     id("com.google.devtools.ksp")
 
     kotlin("plugin.serialization") version "2.2.21"
-
 }
-
-val secretsProperties = Properties()
-val secretsFile = rootProject.file("secrets.properties")
-if (secretsFile.exists()) {
-    FileInputStream(secretsFile).use { secretsProperties.load(it) }
-}
-
 
 android {
     namespace = "cmpt362.group5.bevr"
@@ -31,12 +21,6 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GEMINI_API_KEY", "\"${secretsProperties.getProperty("GEMINI_API_KEY", "")}\"")
-    }
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
     }
 
     buildTypes {
@@ -57,16 +41,17 @@ android {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 }
 
 dependencies {
-    implementation("com.google.ai.client.generativeai:generativeai:0.6.0")
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.compose)
     implementation(libs.compose.m3)
-    implementation(libs.androidx.appcompat)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
@@ -102,6 +87,7 @@ dependencies {
     implementation(libs.maps.compose.utils)
     implementation(libs.maps.compose.widgets)
     implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.libraries.places:places:3.3.0")
 
     /**
      * Location dependencies
