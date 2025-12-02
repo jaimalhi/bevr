@@ -15,11 +15,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -50,6 +54,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider.getUriForFile
@@ -68,7 +73,11 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import java.io.File
-
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.items
 private const val TAG = "DrinkEntryScreen"
 
 private const val DRINK_IMAGE_PATH = "images/new_drink.bmp"
@@ -87,6 +96,10 @@ private lateinit var drinkImageFile: File
 fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkEntryViewModel.Factory)) {
     val context = LocalContext.current
     val activity = LocalActivity.current
+    val scrollState = rememberScrollState()
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var autocompleteResults by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    val placesClient = remember { Places.createClient(context) }
 
     val locationClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -102,20 +115,72 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
         }
     }
 
+    @SuppressLint("VisibleForTests")
+    fun fetchAutocompletePredictions(query: String, onResult: (List<Pair<String, String>>) -> Unit) {
+        val bounds = drinkLocation?.let { latLng ->
+            com.google.android.libraries.places.api.model.RectangularBounds.newInstance(
+                LatLng(latLng.latitude - 0.05, latLng.longitude - 0.05),
+                LatLng(latLng.latitude + 0.05, latLng.longitude + 0.05)
+            )
+        }
+        val requestBuilder = FindAutocompletePredictionsRequest.builder()
+            .setQuery(query)
+            .setTypesFilter(listOf("establishment"))
+
+        bounds?.let { requestBuilder.setLocationBias(it) }
+        val request = requestBuilder.build()
+
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { response ->
+                onResult(response.autocompletePredictions.map { it.getFullText(null).toString() to it.placeId })
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    // When a user clicks a result, fetch coordinates
+    fun selectPlace(placeId: String) {
+        val request = com.google.android.libraries.places.api.net.FetchPlaceRequest.builder(
+            placeId,
+            listOf(com.google.android.libraries.places.api.model.Place.Field.LAT_LNG)
+        ).build()
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response ->
+                response.place.latLng?.let { drinkLocation = it }
+            }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun requestCurrentLocation() {
+        locationClient
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    drinkLocation = LatLng(location.latitude, location.longitude)
+                } else {
+                    Log.w(TAG, "Current location is null, not updating drinkLocation")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Failed to get current location: $exception")
+            }
+    }
+
     @SuppressLint("MissingPermission")
     fun updateLocation() {
-        locationClient.lastLocation.addOnSuccessListener { location ->
-            drinkLocation = LatLng(location.latitude, location.longitude)
-        }.addOnFailureListener { exception ->
-            Log.w(TAG, "Failed to get last location: $exception")
-            Log.i(TAG, "Getting current location instead")
-            locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-                .addOnSuccessListener { location ->
+        locationClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
                     drinkLocation = LatLng(location.latitude, location.longitude)
-                }.addOnFailureListener { exception ->
-                    Log.w(TAG, "Failed to get current location: $exception")
+                } else {
+                    Log.w(TAG, "Last location was null, requesting current location")
+                    requestCurrentLocation()
                 }
-        }
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Failed to get last location: $exception")
+                Log.i(TAG, "Getting current location instead")
+                requestCurrentLocation()
+            }
     }
 
     val multiplePermissionRequestLauncher = rememberLauncherForActivityResult(
@@ -237,7 +302,10 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
     var rating by rememberSaveable { mutableStateOf(DEFAULT_RATING) }
 
     Column(
-        modifier = Modifier.padding(Spacing.Medium),
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxSize()
+            .padding(Spacing.Medium),
         verticalArrangement = Arrangement.spacedBy(Spacing.Medium),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -258,63 +326,17 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
             shape = MaterialTheme.shapes.medium
         )
 
-        Text(
-            text = "What type is it?",
-            style = MaterialTheme.typography.labelLarge
-        )
-        LazyVerticalGrid(
-            modifier = Modifier.wrapContentHeight(),
-            columns = GridCells.Fixed(6)
-        ) {
-            items(drinkTypes) { drinkType ->
-                Column(
-                    modifier = Modifier
-                        .padding(Spacing.Small)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    FilledIconToggleButton(drinkType.id == selectedDrinkTypeId, { selectedDrinkTypeId = drinkType.id }) {
-                        Icon(
-                            painter = painterResource(drinkType.icon.resId),
-                            contentDescription = drinkType.name,
-                            modifier = Modifier.size(IconSize.Standard),
-                        )
-                    }
-                    Text(
-                        text = drinkType.name,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
-        }
-
-        Text(
-            text = "Give it a rating",
-            style = MaterialTheme.typography.labelLarge
-        )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            (1..5).forEach {
-                OutlinedIconButton({ rating = if (it == rating) 0 else it }) {
-                    Icon(
-                        imageVector = if (it <= rating) Icons.Default.Star else Icons.Default.StarBorder,
-                        contentDescription = "Rating star",
-                    )
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(Spacing.Medium),
             horizontalArrangement = Arrangement.spacedBy(Spacing.Medium),
         ) {
             Box(
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.medium)
-                    .fillMaxSize()
+                    .fillMaxHeight()
                     .weight(1f)
                     .clickable(onClick = imageClickHandler)
                     .background(MaterialTheme.colorScheme.secondaryContainer),
@@ -338,7 +360,6 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
                     )
                 }
             }
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -349,10 +370,111 @@ fun DrinkEntryScreen(viewModel: DrinkEntryViewModel = viewModel(factory = DrinkE
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
                     onMapClick = { drinkLocation = it },
+                    uiSettings = com.google.maps.android.compose.MapUiSettings(
+                        scrollGesturesEnabled = true,
+                        zoomControlsEnabled = true
+                    )
                 ) {
                     drinkLocation?.let {
                         Marker(
                             state = rememberUpdatedMarkerState(it)
+                        )
+                    }
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(scrollState)
+                .padding(Spacing.Medium),
+            verticalArrangement = Arrangement.spacedBy(Spacing.Medium),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // search box
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                    if (it.isNotBlank()) fetchAutocompletePredictions(it) { results ->
+                        autocompleteResults = results
+                    }
+                    else autocompleteResults = emptyList()
+                },
+                label = { Text("Search for place") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Show autocomplete results
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 150.dp) // bigger for visibility
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clip(MaterialTheme.shapes.medium)
+            ){
+                items(autocompleteResults) { (name, placeId) ->
+                    Text(
+                        text = name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                searchQuery = name
+                                autocompleteResults = emptyList()
+                                selectPlace(placeId)
+                            }
+                            .padding(8.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            Text(
+                text = "What type is it?",
+                style = MaterialTheme.typography.labelLarge
+            )
+            LazyVerticalGrid(
+                modifier = Modifier.heightIn(max = 250.dp)
+                .fillMaxWidth(),
+                columns = GridCells.Fixed(4)
+            ) {
+                items(drinkTypes) { drinkType ->
+                    Column(
+                        modifier = Modifier
+                            .padding(Spacing.Small)
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        FilledIconToggleButton(
+                            drinkType.id == selectedDrinkTypeId,
+                            { selectedDrinkTypeId = drinkType.id }) {
+                            Icon(
+                                painter = painterResource(drinkType.icon.resId),
+                                contentDescription = drinkType.name,
+                                modifier = Modifier.size(IconSize.Standard),
+                            )
+                        }
+                        Text(
+                            text = drinkType.name,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+            Text(
+                text = "Give it a rating",
+                style = MaterialTheme.typography.labelLarge
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                (1..5).forEach {
+                    OutlinedIconButton({ rating = if (it == rating) 0 else it }) {
+                        Icon(
+                            imageVector = if (it <= rating) Icons.Default.Star else Icons.Default.StarBorder,
+                            contentDescription = "Rating star",
                         )
                     }
                 }

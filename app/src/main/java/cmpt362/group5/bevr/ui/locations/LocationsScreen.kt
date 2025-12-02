@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -59,10 +60,18 @@ fun LocationsScreen(viewModel: LocationsViewModel = viewModel(factory = Location
     ) {
         drinkRecords.forEach { recordDrink ->
             val record = recordDrink.drinkRecord
+            val markerColor = when (record.rating) {
+                in 0..2 -> BitmapDescriptorFactory.HUE_RED
+                in 3..4 -> BitmapDescriptorFactory.HUE_ORANGE
+                5 -> BitmapDescriptorFactory.HUE_GREEN
+                else -> BitmapDescriptorFactory.HUE_AZURE
+            }
+
             Marker(
                 state = MarkerState(LatLng(record.latitude, record.longitude)),
                 title = record.name,
-                snippet = "Rating: ${record.rating}"
+                snippet = "Rating: ${record.rating}",
+                icon = BitmapDescriptorFactory.defaultMarker(markerColor)
             )
         }
     }
