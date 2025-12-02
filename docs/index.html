@@ -140,18 +140,42 @@
                               </p>
                            </div>
 
-                           <div class="flex flex-wrap gap-3">
+                           <div class="grid grid-cols-2 gap-3 max-w-[480px]">
+                              <!-- Download APK (spans 2 columns) -->
                               <a
                                  href="./assets/bevr.apk"
                                  download
-                                 class="flex h-10 min-w-[120px] max-w-[260px] items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white transition-opacity hover:opacity-90 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
+                                 class="col-span-2 flex h-10 items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white transition-opacity hover:opacity-90 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
                                  <span class="truncate">Download APK</span>
+                                 <span
+                                    class="material-symbols-outlined text-3xl text-white"
+                                    aria-hidden="true"
+                                    >download</span
+                                 >
                               </a>
 
+                              <!-- View on GitHub -->
                               <a
                                  href="https://github.com/jaimalhi/bevr/"
-                                 class="flex h-10 min-w-[120px] max-w-[260px] items-center justify-center overflow-hidden rounded-lg bg-gray-200 px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#111418] transition-colors hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
+                                 class="flex h-10 items-center justify-center overflow-hidden rounded-lg bg-gray-200 px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#111418] transition-colors hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
                                  <span class="truncate">View on GitHub</span>
+                                 <span
+                                    class="material-symbols-outlined text-3xl text-primary"
+                                    aria-hidden="true"
+                                    >arrow_outward</span
+                                 >
+                              </a>
+
+                              <!-- Download Source Code -->
+                              <a
+                                 href="./assets/group5-bevr.zip"
+                                 class="flex h-10 items-center justify-center overflow-hidden rounded-lg bg-gray-200 px-4 text-sm font-bold leading-normal tracking-[0.015em] text-[#111418] transition-colors hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
+                                 <span class="truncate">Source Code</span>
+                                 <span
+                                    class="material-symbols-outlined text-3xl text-primary"
+                                    aria-hidden="true"
+                                    >download</span
+                                 >
                               </a>
                            </div>
                         </div>
@@ -465,6 +489,22 @@
                                  Google Maps for location services
                               </li>
                            </ul>
+
+                           <br />
+
+                           <div class="flex-1">
+                              <h3 class="mb-2 text-lg font-bold text-[#111418] dark:text-white">
+                                 Work Breakdown Structure
+                              </h3>
+                              <div class="w-full">
+                                 <img
+                                    src="./assets/wbs/Bevr-WBS.png"
+                                    alt="bevr work breakdown structure"
+                                    class="w-full rounded-lg border border-gray-200 dark:border-gray-800 hover:scale-105 transition-transform duration-300" />
+                              </div>
+                           </div>
+
+                           <br />
 
                            <div class="flex-1">
                               <h3 class="mb-2 text-lg font-bold text-[#111418] dark:text-white">
